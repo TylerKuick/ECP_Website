@@ -244,8 +244,6 @@ Resources:
             nvm install 16.0.0
             git clone https://github.com/TylerKuick/ECP_Website
             cd ~/ECP_Website/front-end
-            npm i 
-            npm run build
             sudo cp -r dist/* /var/www/html
             sudo systemctl restart httpd
 
