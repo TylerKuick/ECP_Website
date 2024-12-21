@@ -366,6 +366,7 @@ Resources:
             nvm install 16.0.0
             git clone https://github.com/TylerKuick/ECP_Website
             chmod +x node_modules/.bin/nodemon
+            cd ./ECP_Website/back-end
             npm i 
             npm start
 
