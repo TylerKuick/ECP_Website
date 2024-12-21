@@ -169,6 +169,12 @@ Resources:
     Properties:
       GroupDescription: Security group for RDS instance
       VpcId: !Ref EcpProjectVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        SourceSecurityGroupId: !GetAtt AppServerSecurityGroup.GroupId
+
 
   MyRDSInstance:
     Type: AWS::RDS::DBInstance
@@ -251,9 +257,9 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     DeletionPolicy: Delete
     Properties:
-      MinSize: '2'
-      MaxSize: '2'
-      DesiredCapacity: '2'
+      MinSize: '1'
+      MaxSize: '1'
+      DesiredCapacity: '1'
       LaunchTemplate:
         LaunchTemplateId: !Ref WebServerLaunchTemplate
         Version: !GetAtt WebServerLaunchTemplate.LatestVersionNumber
@@ -267,9 +273,13 @@ Resources:
   WebScalingPolicy:
     Type: 'AWS::AutoScaling::ScalingPolicy'
     Properties:
+      PolicyType: TargetTrackingScaling
       AdjustmentType: ChangeInCapacity
       AutoScalingGroupName: !Ref WebASG
-      ScalingAdjustment: '1'
+      TargetTrackingConfiguration: 
+        PredefinedMetricSpecification: 
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 50
    
   WebTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -318,11 +328,11 @@ Resources:
       - IpProtocol: tcp
         FromPort: 80
         ToPort: 80
-        CidrIp: 0.0.0.0/0
+        SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
       - IpProtocol: tcp
         FromPort: 22
         ToPort: 22
-        CidrIp: 0.0.0.0/0
+        SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
 
   AppServerLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -341,21 +351,31 @@ Resources:
         UserData: 
           Fn::Base64: !Sub |
             #!/bin/bash
+            cd ~ 
             sudo yum update -y
             sudo amazon-linux-extras install epel -y
             sudo yum install stress -y
-            sudo yum install -y httpd
-            sudo systemctl start httpd
-            sudo systemctl enable httpd
-            sudo echo "<h1>Chinelo's Cloud Formation</h1>" > /var/www/html/index.html
+            sudo yum install -y git
+            sudo yum install -y curl
+            sudo yum install mariadb
+            mysql --version
+            mysql -h ecp-rds.c1k66kg04pyj.us-east-1.rds.amazonaws.com -P 3306 -u admin -p=password
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install 16.0.0
+            git clone https://github.com/TylerKuick/ECP_Website
+            chmod +x node_modules/.bin/nodemon
+            npm i 
+            npm start
 
   AppASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     DeletionPolicy: Delete
     Properties:
-      MinSize: '2'
-      MaxSize: '2'
-      DesiredCapacity: '2'
+      MinSize: '1'
+      MaxSize: '1'
+      DesiredCapacity: '1'
       LaunchTemplate:
         LaunchTemplateId: !Ref AppServerLaunchTemplate
         Version: !GetAtt AppServerLaunchTemplate.LatestVersionNumber
@@ -369,16 +389,20 @@ Resources:
   AppScalingPolicy:
     Type: 'AWS::AutoScaling::ScalingPolicy'
     Properties:
+      PolicyType: TargetTrackingScaling
       AdjustmentType: ChangeInCapacity
       AutoScalingGroupName: !Ref AppASG
-      ScalingAdjustment: '1'
-   
+      TargetTrackingConfiguration: 
+        PredefinedMetricSpecification: 
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 50
+
   AppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       VpcId: !Ref EcpProjectVPC
       TargetType: instance
-      HealthCheckPath: /index.html
+      HealthCheckPath: /index.js
       Port: 80
       Protocol: HTTP
       Tags:

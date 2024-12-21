@@ -1,0 +1,22 @@
+#!/bin/bash
+cd ~ 
+sudo yum update -y
+sudo amazon-linux-extras install epel -y
+sudo yum install stress -y
+sudo yum install -y httpd
+sudo systemctl start httpd
+sudo systemctl enable httpd
+sudo yum install -y git
+sudo yum install -y curl
+sudo yum install mariadb
+mysql --version
+mysql -h ecp-rds.c1k66kg04pyj.us-east-1.rds.amazonaws.com -P 3306 -u admin -p=password
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm install 16.0.0
+git clone https://github.com/TylerKuick/ECP_Website
+sudo cp -r ~/ECP_Website/back-end/* /var/www/html
+sudo systemctl restart httpd
+
+chmod +x node_modules/.bin/nodemon
