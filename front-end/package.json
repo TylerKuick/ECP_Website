@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "build": "vite build",
+    "start": "vite --max_old_space_size=4096",
+    "build": "vite build --max_old_space_size=4096",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

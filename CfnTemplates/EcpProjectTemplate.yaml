@@ -229,6 +229,7 @@ Resources:
         UserData: 
           Fn::Base64: !Sub |
             #!/bin/bash
+            cd ~ 
             sudo yum update -y
             sudo amazon-linux-extras install epel -y
             sudo yum install stress -y
@@ -236,22 +237,25 @@ Resources:
             sudo systemctl start httpd
             sudo systemctl enable httpd
             sudo yum install -y git
+            sudo yum install -y curl
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-            . ~/.nvm/nvm.sh
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16.0.0
             git clone https://github.com/TylerKuick/ECP_Website
-            cd ./ECP_Website/front-end
+            cd ~/ECP_Website/front-end
             npm i 
             npm run build
             sudo cp -r dist/* /var/www/html
+            sudo systemctl restart httpd
 
   WebASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     DeletionPolicy: Delete
     Properties:
-      MinSize: '1'
+      MinSize: '2'
       MaxSize: '2'
-      DesiredCapacity: '1'
+      DesiredCapacity: '2'
       LaunchTemplate:
         LaunchTemplateId: !Ref WebServerLaunchTemplate
         Version: !GetAtt WebServerLaunchTemplate.LatestVersionNumber
@@ -351,9 +355,9 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     DeletionPolicy: Delete
     Properties:
-      MinSize: '1'
+      MinSize: '2'
       MaxSize: '2'
-      DesiredCapacity: '1'
+      DesiredCapacity: '2'
       LaunchTemplate:
         LaunchTemplateId: !Ref AppServerLaunchTemplate
         Version: !GetAtt AppServerLaunchTemplate.LatestVersionNumber
