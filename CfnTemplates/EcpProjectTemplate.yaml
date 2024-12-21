@@ -330,6 +330,10 @@ Resources:
         ToPort: 80
         SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
       - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
+      - IpProtocol: tcp
         FromPort: 22
         ToPort: 22
         SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
@@ -359,16 +363,19 @@ Resources:
             sudo yum install -y curl
             sudo yum install mariadb
             mysql --version
-            mysql -h ecp-rds.c1k66kg04pyj.us-east-1.rds.amazonaws.com -P 3306 -u admin -p=password
+            mysql -h ecp-rds.c1k66kg04pyj.us-east-1.rds.amazonaws.com -P 3306 -u admin -password=password
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16.0.0
-            git clone https://github.com/TylerKuick/ECP_Website
-            chmod +x node_modules/.bin/nodemon
+            sudo git clone https://github.com/TylerKuick/ECP_Website
+            sudo yum install libcap2-bin 
+            sudo setcap cap_net_bind_service=+ep `readlink -f \`which node\``
+            sudo chmod +x node_modules/.bin/nodemon
             cd ./ECP_Website/back-end
             npm i 
-            npm start
+            npm install pm2 -g
+            pm2 start index.js  
 
   AppASG:
     Type: AWS::AutoScaling::AutoScalingGroup
