@@ -1,12 +1,21 @@
 import { React, useState, useEffect } from 'react';
-import { Box, Typography, Grid2, Card, CardContent, IconButton, Input } from '@mui/material';
+import { Box, Typography, Grid2, Card, CardContent, IconButton, Input, Button } from '@mui/material';
 import http from '../http';
 
 function Cart() {
     const [cartId, setCartId] = useState("");
     const [cartItems, setCartItems] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [prodList, setProductList] = useState([]);
     const custId = 1;
     
+    const getProductList = () => {
+        http.get('/products').then((res) => {
+            setProductList(res.data);
+            console.log(res.data);
+        });
+    }
+
     const getCartId = () => {
         http.get(`/cart?search=${custId}`).then((res) => {
             setCartId(res.data[0].id);
@@ -19,15 +28,38 @@ function Cart() {
         });
     };
 
+    const onClickCheckout = () => {
+        let data = {
+            "cart_total": total
+        }
+        console.log(data);
+        //http.post(`/cart/${cartId}/checkout`, data)
+    };
+
+    const onClickClearCart = () => {
+        cartItems.map((item) => {
+            http.delete(`/cart/${cartId}/items/${item.id}`);
+        });
+        setCartItems([]);
+    };
+
     useEffect(() => {
         getCartId();
+    });
+
+    useEffect(() => {
         getCartItems();
+        getProductList();
     }, [cartId]);
+
+    useEffect(() => {
+        setTotal(cartItems.map((x) => x.total).reduce((x,y) => {return parseFloat(x) + parseFloat(y)}, 0));
+    }, [cartItems]);
 
     return (
         <Box>
-            <Typography variant="h4" sx={{my:2}}>
-                Cart
+            <Typography variant="h4" sx={{pt: 5, my:2, fontWeight:"bold"}}>
+                Your Cart
             </Typography>
             <Grid2 container spacing={2}>
                 {
@@ -37,7 +69,7 @@ function Cart() {
                                 <Card>
                                     <CardContent>
                                         <Typography varaint="h6" sx={{ mb: 1 }}>
-                                            Product ID: {citem.ProductId}
+                                            {prodList.filter(prod => prod.id == citem.ProductId).map(prod => prod.prod_name)}
                                         </Typography>
                                         <Typography>
                                             Qty: {citem.quantity}
@@ -52,7 +84,19 @@ function Cart() {
                     })
                 }
             </Grid2>
-
+            <Box sx={{mt: 5}}>
+                <Typography>Total: ${total}</Typography>
+            </Box>
+            <Button variant="contained" 
+                sx={{mt: 2}}
+                onClick={() => onClickCheckout()}>
+                Checkout
+            </Button>
+            <Button variant="contained" 
+                sx={{mt: 2, ml: 2}}
+                onClick={() => onClickClearCart()}>
+                Clear Cart Items
+            </Button>
         </Box>
     )
 }

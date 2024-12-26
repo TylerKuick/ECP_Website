@@ -7,7 +7,8 @@ const yup = require('yup');
 router.post("/", async (req, res) => {
     let data = req.body;
     let validationSchema = yup.object({
-        CustomerId: yup.number().required()
+        CustomerId: yup.number().required(),
+        total: yup.string().trim().min(1).max(4).matches("^[0-9]*\.[0-9]*").required()
     });
     try {
         await validationSchema.validate(data, 
@@ -19,7 +20,8 @@ router.post("/", async (req, res) => {
         res.status(400).json({errors: err.errors});
         return; 
     }
-    data.CustomerId = data.CustomerId
+    data.CustomerId = data.CustomerId;
+    data.total = data.total.trim();
     let result = await Cart.create(data);
     res.json(result);
 });
@@ -192,5 +194,16 @@ router.delete("/:id/items/:itemid", async (req, res) => {
         res.status(400).json({message: `Cannot delete cart item with id ${itemid}`})
     }
 });
+
+// Checkout methods
+router.post("/:id/checkout", async (req, res) => {
+    let id = req.params.id;
+    let cart = await Cart.findByPk(id);
+    if (!cart) {
+        res.sendStatus(404);
+        return;
+    }
+
+})
 
 module.exports = router;

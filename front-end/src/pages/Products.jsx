@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Grid2, Card, CardContent, IconButton, Input, Button } from '@mui/material';
+import { Box, Typography, Grid2, Card, CardContent, IconButton, Input, Button} from '@mui/material';
+import { Link } from 'react-router-dom';
 import { Search, Clear } from "@mui/icons-material";
 import http from "../http";
 
@@ -57,6 +58,12 @@ function Products() {
         setSearch("");
         getProducts();
     }
+
+    const onClickAddProduct = () => {
+        let data = {
+
+        } 
+    }
     
     // Initialization
     useEffect(() => {
@@ -68,9 +75,16 @@ function Products() {
         
     return (
         <Box>
-            <Typography variant="h4" sx={{my:2}}>
-                Products
-            </Typography>
+            <Box sx={{alignItems:'center', display:'flex', mt:5}}>
+                <Typography variant="h4" sx={{my:2, fontWeight:"bold"}}>
+                    Products
+                </Typography>
+                <Button variant='contained' sx={{ml: 5}}>
+                    <Link to='/newProduct' className='link'>
+                        Add Products 
+                    </Link>
+                </Button>
+            </Box>
             <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                 <Input value={search} placeholder="Search" onChange={onSearchChange} onKeyDown={onSearchKeyDown}/>
                 <IconButton color="primary" onClick={onClickSearch}>
