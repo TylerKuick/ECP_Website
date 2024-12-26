@@ -1,5 +1,6 @@
 import { React, useState, useEffect } from 'react';
 import { Box, Typography, Grid2, Card, CardContent, IconButton, Input, Button } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import http from '../http';
 
 function Cart() {
@@ -12,7 +13,6 @@ function Cart() {
     const getProductList = () => {
         http.get('/products').then((res) => {
             setProductList(res.data);
-            console.log(res.data);
         });
     }
 
@@ -43,13 +43,21 @@ function Cart() {
         setCartItems([]);
     };
 
+    const deleteItem = (id) => {
+        http.delete(`/cart/${cartId}/items/${id}`).then( (res) => {
+            http.get(`/cart/${cartId}/items`).then((res) => {
+                setCartItems(res.data);
+            })
+        });   
+    }
+
     useEffect(() => {
         getCartId();
-    });
+        getProductList();
+    },[]);
 
     useEffect(() => {
         getCartItems();
-        getProductList();
     }, [cartId]);
 
     useEffect(() => {
@@ -67,16 +75,21 @@ function Cart() {
                         return(
                             <Grid2 item xs={12} md={6} lg={4} key={citem.id}>
                                 <Card>
-                                    <CardContent>
-                                        <Typography varaint="h6" sx={{ mb: 1 }}>
-                                            {prodList.filter(prod => prod.id == citem.ProductId).map(prod => prod.prod_name)}
-                                        </Typography>
-                                        <Typography>
-                                            Qty: {citem.quantity}
-                                        </Typography>
-                                        <Typography>
-                                            Total: ${citem.total}
-                                        </Typography>
+                                    <CardContent sx={{display:"flex"}}>
+                                        <Box>
+                                            <Typography varaint="h6" sx={{ mb: 1 , mr: 4}}>
+                                                {prodList.filter(prod => prod.id == citem.ProductId).map(prod => prod.prod_name)}
+                                            </Typography>
+                                            <Typography>
+                                                Qty: {citem.quantity}
+                                            </Typography>
+                                            <Typography>
+                                                Total: ${citem.total}
+                                            </Typography>
+                                        </Box>
+                                        <Button color="error" onClick={() => deleteItem(citem.id)}>
+                                            <Delete/>
+                                        </Button>
                                     </CardContent>
                                 </Card>
                             </Grid2>
