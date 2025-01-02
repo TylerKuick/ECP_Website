@@ -279,7 +279,7 @@ Resources:
       TargetTrackingConfiguration: 
         PredefinedMetricSpecification: 
           PredefinedMetricType: ASGAverageCPUUtilization
-        TargetValue: 50
+        TargetValue: 20
    
   WebTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -361,25 +361,23 @@ Resources:
             sudo yum install stress -y
             sudo yum install -y git
             sudo yum install -y curl
-            sudo yum install mariadb
+            sudo yum install mariadb -y
             mysql --version
-            mysql --defaults-file=~/ECP_Website/back-end/.my.cnf -u admin -h ecp-rds.c1k66kg04pyj.us-east-1.rds.amazonaws.com
-            CREATE DATABASE ecp_dev;
-            exit;
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16.0.0
             sudo git clone https://github.com/TylerKuick/ECP_Website
-            sudo setcap cap_net_bind_service=+ep `readlink -f \`which node\``
+            mysql --defaults-file=~/ECP_Website/back-end/.my.cnf -u admin -h ecp-rds.c1k66kg04pyj.us-east-1.rds.amazonaws.com "CREATE DATABASE ecp_dev;"
             cd ./ECP_Website/back-end
             sudo chmod +x node_modules/.bin/nodemon
             npm i 
+            npm start
             npm install pm2 -g
             pm2 start index.js  
   # Process to start app server: 
-  # 1) Database "ecp_dev" must be available
-  # 2) nodemon must be executable 
+  # 1) Database "ecp_dev" must be created beforehand
+  # 2) npm start server before pm2 start
   # 3) "pm2 start index.js" to start app server 
 
   AppASG:
@@ -408,7 +406,7 @@ Resources:
       TargetTrackingConfiguration: 
         PredefinedMetricSpecification: 
           PredefinedMetricType: ASGAverageCPUUtilization
-        TargetValue: 50
+        TargetValue: 20
 
   AppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
