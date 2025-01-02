@@ -363,7 +363,7 @@ Resources:
             sudo yum install -y curl
             sudo yum install mariadb
             mysql --version
-            mysql --defaults-file=/ECP_Website/backend/.my.cnf -u admin
+            mysql --defaults-file=~/ECP_Website/back-end/.my.cnf -u admin -h ecp-rds.c1k66kg04pyj.us-east-1.rds.amazonaws.com
             CREATE DATABASE ecp_dev;
             exit;
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
