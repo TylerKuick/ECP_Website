@@ -413,7 +413,7 @@ Resources:
       VpcId: !Ref EcpProjectVPC
       TargetType: instance
       HealthCheckPath: /index.js
-      Port: 80
+      Port: 8080
       Protocol: HTTP
       Tags:
         - Key: Name
