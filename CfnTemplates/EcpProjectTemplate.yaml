@@ -368,16 +368,15 @@ Resources:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16.0.0
             sudo git clone https://github.com/TylerKuick/ECP_Website
-            mysql --defaults-file=~/ECP_Website/back-end/.my.cnf -u admin -h ecp-rds.c1k66kg04pyj.us-east-1.rds.amazonaws.com "CREATE DATABASE ecp_dev;"
+            mysql --defaults-file=~/ECP_Website/back-end/.my.cnf -u admin -h ecp-rds.c1k66kg04pyj.us-east-1.rds.amazonaws.com -e "CREATE DATABASE ecp_dev;"
             cd ./ECP_Website/back-end
             sudo chmod +x node_modules/.bin/nodemon
             npm i 
-            npm start
             npm install pm2 -g
             pm2 start index.js  
   # Process to start app server: 
   # 1) Database "ecp_dev" must be created beforehand
-  # 2) npm start server before pm2 start
+  # 2) chmod nodemon in nodemon modules
   # 3) "pm2 start index.js" to start app server 
 
   AppASG:
