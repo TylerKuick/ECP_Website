@@ -235,7 +235,6 @@ Resources:
         UserData: 
           Fn::Base64: !Sub |
             #!/bin/bash
-            cd ~ 
             sudo yum update -y
             sudo amazon-linux-extras install epel -y
             sudo yum install stress -y
@@ -249,7 +248,7 @@ Resources:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16.0.0
             git clone https://github.com/TylerKuick/ECP_Website
-            cd ~/ECP_Website/front-end
+            cd ./ECP_Website/front-end
             sudo cp -r dist/* /var/www/html
             sudo systemctl restart httpd
 
@@ -322,7 +321,7 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       GroupName: app-server-sg
-      GroupDescription: Allow SSH and HTTP
+      GroupDescription: Allow SSH, HTTP, and Port 8080 Access
       VpcId: !Ref EcpProjectVPC
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -355,10 +354,12 @@ Resources:
         UserData: 
           Fn::Base64: !Sub |
             #!/bin/bash
-            cd ~ 
             sudo yum update -y
             sudo amazon-linux-extras install epel -y
             sudo yum install stress -y
+            sudo yum install -y httpd
+            sudo systemctl start httpd
+            sudo systemctl enable httpd
             sudo yum install -y git
             sudo yum install -y curl
             sudo yum install mariadb -y
@@ -374,10 +375,22 @@ Resources:
             npm i 
             npm install pm2 -g
             pm2 start index.js  
+            pm2 stop index.js
+            sudo cp -f httpd.conf /etc/httpd/conf 
+            sudo cp nodeapp.service /lib/systemd/system
+            sudo systemctl daemon-reload
+            sudo systemctl start nodeapp
+            sudo systemctl enable nodeapp
+            sudo systemctl restart httpd
+
+            
   # Process to start app server: 
   # 1) Database "ecp_dev" must be created beforehand
   # 2) chmod nodemon in nodemon modules
   # 3) "pm2 start index.js" to start app server 
+
+  # NEW ISSUE: Target Group Health Check for Port 8080 & 80 failing, ELB does not 
+  # route traffic to App Servers properly
 
   AppASG:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -413,7 +426,7 @@ Resources:
       VpcId: !Ref EcpProjectVPC
       TargetType: instance
       HealthCheckPath: /index.js
-      Port: 8080
+      Port: 80
       Protocol: HTTP
       Tags:
         - Key: Name
