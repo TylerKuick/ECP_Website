@@ -286,6 +286,7 @@ Resources:
       VpcId: !Ref EcpProjectVPC
       TargetType: instance
       HealthCheckPath: /index.html
+      HealthCheckTimeoutSeconds: 28
       Port: 80
       Protocol: HTTP
       Tags:
@@ -321,7 +322,7 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       GroupName: app-server-sg
-      GroupDescription: Allow SSH, HTTP, and Port 8080 Access
+      GroupDescription: Allow SSH, HTTP, and Port 3001 Access
       VpcId: !Ref EcpProjectVPC
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -329,8 +330,8 @@ Resources:
         ToPort: 80
         SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
       - IpProtocol: tcp
-        FromPort: 3000
-        ToPort: 3000
+        FromPort: 3001
+        ToPort: 3001
         SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
       - IpProtocol: tcp
         FromPort: 22
@@ -368,10 +369,14 @@ Resources:
             sudo git clone https://github.com/TylerKuick/ECP_Website
 
             db_host=$(aws rds describe-db-instances --db-instance-identifier ecp-rds --query 'DBInstances[0].Endpoint.Address' --output text)
-            mysql --defaults-file=~/ECP_Website/back-end/.my.cnf -u admin -h "$db_host" -e "CREATE DATABASE ecp_dev;"
+            echo $db_host
+            mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$db_host" -e "CREATE DATABASE ecp_dev;"
 
             cd ./ECP_Website/back-end
             sudo chmod +x node_modules/.bin/nodemon
+
+            sudo nano .env 
+
             npm i 
             npm install pm2 -g
             pm2 start index.js
@@ -382,7 +387,7 @@ Resources:
   # 3) "pm2 start index.js" to start app server 
   # 4) rds endpoint must be configured in userdata and in backend env file *IMPT* <--- Causes Connection Error in App Server Runtime due to MYSQL connection
 
-  # NEW ISSUE: Target Group Health Check for Port 8080 & 80 failing, ELB does not 
+  # NEW ISSUE: Target Group Health Check for Port 3001 & 80 failing, ELB does not 
   # route traffic to App Servers properly
 
   AppASG:
@@ -418,8 +423,9 @@ Resources:
     Properties:
       VpcId: !Ref EcpProjectVPC
       TargetType: instance
-      HealthCheckPath: /index.js
-      Port: 3000
+      HealthCheckPath: /
+      HealthCheckTimeoutSeconds: 28
+      Port: 3001
       Protocol: HTTP
       Tags:
         - Key: Name
