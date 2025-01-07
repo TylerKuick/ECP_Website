@@ -368,13 +368,13 @@ Resources:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16.0.0
             sudo git clone https://github.com/TylerKuick/ECP_Website
-
-            db_host=$(aws rds describe-db-instances --db-instance-identifier ecp-rds --query 'DBInstances[0].Endpoint.Address' --output text)
-            echo $db_host
-            mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$db_host" -e "CREATE DATABASE ecp_dev;"
-
+            
             cd ./ECP_Website/back-end
-            echo "DB_HOST='${db_host}'" >> .env
+            
+            export DBHOST=$(aws rds describe-db-instances --db-instance-identifier ecp-rds --query 'DBInstances[0].Endpoint.Address' --output text)
+            mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" -e "CREATE DATABASE ecp_dev;"
+            echo "$DBHOST" >> .env
+
             sudo chmod +x node_modules/.bin/nodemon
             npm i 
             npm install pm2 -g
