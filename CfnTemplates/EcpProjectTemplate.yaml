@@ -249,10 +249,8 @@ Resources:
             nvm install 16.0.0
             git clone https://github.com/TylerKuick/ECP_Website
             cd ./ECP_Website/front-end
-            sudo chmod +x node_modules/.bin/nodemon
-            npm i 
-            npm install pm2 -g
-            pm2 start index.js
+            sudo cp -r dist/* /var/www/html
+            sudo systemctl restart httpd
 
   WebASG:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -376,6 +374,7 @@ Resources:
             mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$db_host" -e "CREATE DATABASE ecp_dev;"
 
             cd ./ECP_Website/back-end
+            echo "DB_HOST='${db_host}'" >> .env
             sudo chmod +x node_modules/.bin/nodemon
             npm i 
             npm install pm2 -g
