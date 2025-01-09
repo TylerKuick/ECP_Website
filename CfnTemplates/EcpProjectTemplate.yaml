@@ -226,6 +226,8 @@ Resources:
       LaunchTemplateData:
         ImageId: ami-04823729c75214919
         InstanceType: t2.micro
+        IamInstanceProfile:
+          Arn: arn:aws:iam::767397761895:instance-profile/LabInstanceProfile
         KeyName: vockey
         NetworkInterfaces: 
           - DeviceIndex: 0
@@ -249,6 +251,12 @@ Resources:
             nvm install 16.0.0
             git clone https://github.com/TylerKuick/ECP_Website
             cd ./ECP_Website/front-end
+
+            export API_URL=$(aws elbv2 describe-load-balancers --names "AppALB" --query 'LoadBalancers[0].DNSName' --region us-east-1 --output text)
+            echo "'$API_URL'" | sudo tee -a .env
+            
+            npm i
+            npm run build 
             sudo cp -r dist/* /var/www/html
             sudo systemctl restart httpd
 
@@ -299,6 +307,7 @@ Resources:
     Properties:
       Type: application
       Scheme: internet-facing
+      Name: WebALB
       SecurityGroups:
       - !Ref WebServerSecurityGroup
       Subnets: 
@@ -347,6 +356,8 @@ Resources:
       LaunchTemplateData:
         ImageId: ami-04823729c75214919
         InstanceType: t2.micro
+        IamInstanceProfile:
+          Arn: arn:aws:iam::767397761895:instance-profile/LabInstanceProfile
         KeyName: vockey
         NetworkInterfaces: 
           - DeviceIndex: 0
@@ -371,9 +382,9 @@ Resources:
             
             cd ./ECP_Website/back-end
             
-            export DBHOST=$(aws rds describe-db-instances --db-instance-identifier ecp-rds --query 'DBInstances[0].Endpoint.Address' --output text)
+            export DBHOST=$(aws rds describe-db-instances --db-instance-identifier ecp-rds --query 'DBInstances[0].Endpoint.Address' --region us-east-1 --output text)
             mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" -e "CREATE DATABASE ecp_dev;"
-            echo "$DBHOST" >> .env
+            echo "'$DBHOST'" | sudo tee -a .env
 
             sudo chmod +x node_modules/.bin/nodemon
             npm i 
@@ -385,6 +396,7 @@ Resources:
   # 2) chmod nodemon in nodemon modules
   # 3) "pm2 start index.js" to start app server 
   # 4) rds endpoint must be configured in userdata and in backend env file *IMPT* <--- Causes Connection Error in App Server Runtime due to MYSQL connection
+  # Unable to write to .env file due to lack of permissions
 
   # NEW ISSUE: Target Group Health Check for Port 3001 & 80 failing, ELB does not 
   # route traffic to App Servers properly
@@ -436,6 +448,7 @@ Resources:
     Properties:
       Type: application
       Scheme: internal
+      Name: AppALB
       SecurityGroups:
       - !Ref AppServerSecurityGroup
       Subnets: 
