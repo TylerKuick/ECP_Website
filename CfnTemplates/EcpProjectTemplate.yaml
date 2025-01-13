@@ -255,6 +255,7 @@ Resources:
             export API_URL=$(aws elbv2 describe-load-balancers --names "AppALB" --query 'LoadBalancers[0].DNSName' --region us-east-1 --output text)
             echo "'$API_URL'" | sudo tee -a .env
             
+            sudo chmod +x node_modules/.bin/vite
             npm i
             npm run build 
             sudo cp -r dist/* /var/www/html
@@ -295,7 +296,7 @@ Resources:
       TargetType: instance
       HealthCheckPath: /index.html
       HealthCheckTimeoutSeconds: 110
-      HealthCheckIntervalSeconds: 300
+      HealthCheckIntervalSeconds: 120
       Port: 80
       Protocol: HTTP
       Tags:
@@ -342,7 +343,7 @@ Resources:
       - IpProtocol: tcp
         FromPort: 3001
         ToPort: 3001
-        SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
+        CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
         FromPort: 22
         ToPort: 22
@@ -390,24 +391,14 @@ Resources:
             npm i 
             npm install pm2 -g
             pm2 start index.js
-            
-  # Process to start app server: 
-  # 1) Database "ecp_dev" must be created beforehand
-  # 2) chmod nodemon in nodemon modules
-  # 3) "pm2 start index.js" to start app server 
-  # 4) rds endpoint must be configured in userdata and in backend env file *IMPT* <--- Causes Connection Error in App Server Runtime due to MYSQL connection
-  # Unable to write to .env file due to lack of permissions
-
-  # NEW ISSUE: Target Group Health Check for Port 3001 & 80 failing, ELB does not 
-  # route traffic to App Servers properly
 
   AppASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     DeletionPolicy: Delete
     Properties:
-      MinSize: '1'
-      MaxSize: '1'
-      DesiredCapacity: '1'
+      MinSize: '2'
+      MaxSize: '2'
+      DesiredCapacity: '2'
       LaunchTemplate:
         LaunchTemplateId: !Ref AppServerLaunchTemplate
         Version: !GetAtt AppServerLaunchTemplate.LatestVersionNumber
@@ -436,7 +427,7 @@ Resources:
       TargetType: instance
       HealthCheckPath: /
       HealthCheckTimeoutSeconds: 110
-      HealthCheckIntervalSeconds: 300
+      HealthCheckIntervalSeconds: 120
       Port: 3001
       Protocol: HTTP
       Tags:
