@@ -173,7 +173,7 @@ Resources:
       - IpProtocol: tcp
         FromPort: 3306
         ToPort: 3306
-        SourceSecurityGroupId: !GetAtt AppServerSecurityGroup.GroupId
+        SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
 
 
   MyRDSInstance:
@@ -200,7 +200,36 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
 
- 
+  Setup-Lambda-RDS-EC2Instance: 
+    Type: "AWS::EC2::Instance"
+    Properties: 
+      ImageId: ami-04823729c75214919
+      InstanceType: t2.micro
+      IamInstanceProfile:
+          Arn: arn:aws:iam::767397761895:instance-profile/LabInstanceProfile
+      KeyName: vockey
+      UserData:
+          Fn::Base64: !Sub |
+          #!/bin/bash
+          sudo yum update -y  
+          sudo yum install -y git
+          git clone https://github.com/TylerKuick/ECP_Website
+
+          # Setup DB and populate DB tables 
+          sudo yum install mariadb -y
+          mysql --version
+          export DBHOST=$(aws rds describe-db-instances --db-instance-identifier ecp-rds --query 'DBInstances[0].Endpoint.Address' --region us-east-1 --output text)
+          mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" -e "CREATE DATABASE ecp_dev;"
+          mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" ecp_dev < /ECP_Website/db_dump/ecp_dev_products.sql
+          mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" ecp_dev < /ECP_Website/db_dump/ecp_dev_customers.sql
+          mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" ecp_dev < /ECP_Website/db_dump/ecp_dev_carts.sql
+          mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" ecp_dev < /ECP_Website/db_dump/ecp_dev_cartitems.sql
+
+          # Copy Lambda Functions to S3 Bucket
+          aws s3 cp /ECP_Website/lambda_functions s3://${BucketName} --recursive     
+          
+
+
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     DeletionPolicy: Delete
@@ -217,6 +246,11 @@ Resources:
         FromPort: 22
         ToPort: 22
         CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        CidrIp: 0.0.0.0/0
+
 
   WebServerLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -250,16 +284,32 @@ Resources:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16.0.0
             git clone https://github.com/TylerKuick/ECP_Website
-            cd ./ECP_Website/front-end
 
-            export API_URL=$(aws elbv2 describe-load-balancers --names "AppALB" --query 'LoadBalancers[0].DNSName' --region us-east-1 --output text)
-            echo "'$API_URL'" | sudo tee -a .env
+            # Set Backend API URL to ELB (DEPRECATED)
+            # export API_URL=$(aws elbv2 describe-load-balancers --names "AppALB" --query 'LoadBalancers[0].DNSName' --region us-east-1 --output text)
+            # echo "'$API_URL'" | sudo tee -a .env
             
+            # Build and copy files to Apache Server files
+            cd ./ECP_Website/front-end
             sudo chmod +x node_modules/.bin/vite
             npm i
             npm run build 
             sudo cp -r dist/* /var/www/html
             sudo systemctl restart httpd
+          
+  WebTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref EcpProjectVPC
+      TargetType: instance
+      HealthCheckPath: /index.html
+      HealthCheckTimeoutSeconds: 110
+      HealthCheckIntervalSeconds: 120
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: Name
+          Value: WebTG
 
   WebASG:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -288,20 +338,6 @@ Resources:
         PredefinedMetricSpecification: 
           PredefinedMetricType: ASGAverageCPUUtilization
         TargetValue: 20
-   
-  WebTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      VpcId: !Ref EcpProjectVPC
-      TargetType: instance
-      HealthCheckPath: /index.html
-      HealthCheckTimeoutSeconds: 110
-      HealthCheckIntervalSeconds: 120
-      Port: 80
-      Protocol: HTTP
-      Tags:
-        - Key: Name
-          Value: WebTG
 
   WebALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -328,134 +364,158 @@ Resources:
           TargetGroupArn: !Ref WebTargetGroup
       LoadBalancerArn: !Ref WebALB
 
-  AppServerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    DeletionPolicy: Delete
-    Properties:
-      GroupName: app-server-sg
-      GroupDescription: Allow SSH, HTTP, and Port 3001 Access
-      VpcId: !Ref EcpProjectVPC
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
-        SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
-      - IpProtocol: tcp
-        FromPort: 3001
-        ToPort: 3001
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
+  # AppServerSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   DeletionPolicy: Delete
+  #   Properties:
+  #     GroupName: app-server-sg
+  #     GroupDescription: Allow SSH, HTTP, and Port 3001 Access
+  #     VpcId: !Ref EcpProjectVPC
+  #     SecurityGroupIngress:
+  #     - IpProtocol: tcp
+  #       FromPort: 80
+  #       ToPort: 80
+  #       SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
+  #     - IpProtocol: tcp
+  #       FromPort: 3001
+  #       ToPort: 3001
+  #       CidrIp: 0.0.0.0/0
+  #     - IpProtocol: tcp
+  #       FromPort: 22
+  #       ToPort: 22
+  #       SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
 
-  AppServerLaunchTemplate:
-    Type: AWS::EC2::LaunchTemplate
-    DeletionPolicy: Delete
-    Properties:
-      LaunchTemplateName: app-server-launchtemp
-      LaunchTemplateData:
-        ImageId: ami-04823729c75214919
-        InstanceType: t2.micro
-        IamInstanceProfile:
-          Arn: arn:aws:iam::767397761895:instance-profile/LabInstanceProfile
-        KeyName: vockey
-        NetworkInterfaces: 
-          - DeviceIndex: 0
-            AssociatePublicIpAddress: false
-            Groups:
-              - !Ref AppServerSecurityGroup
-        UserData: 
-          Fn::Base64: !Sub |
-            #!/bin/bash
-            sudo yum update -y
-            sudo amazon-linux-extras install epel -y
-            sudo yum install stress -y
-            sudo yum install -y git
-            sudo yum install -y curl
-            sudo yum install mariadb -y
-            mysql --version
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm install 16.0.0
-            sudo git clone https://github.com/TylerKuick/ECP_Website
+  # AppServerLaunchTemplate:
+  #   Type: AWS::EC2::LaunchTemplate
+  #   DeletionPolicy: Delete
+  #   Properties:
+  #     LaunchTemplateName: app-server-launchtemp
+  #     LaunchTemplateData:
+  #       ImageId: ami-04823729c75214919
+  #       InstanceType: t2.micro
+  #       IamInstanceProfile:
+  #         Arn: arn:aws:iam::767397761895:instance-profile/LabInstanceProfile
+  #       KeyName: vockey
+  #       NetworkInterfaces: 
+  #         - DeviceIndex: 0
+  #           AssociatePublicIpAddress: false
+  #           Groups:
+  #             - !Ref AppServerSecurityGroup
+  #       UserData: 
+  #         Fn::Base64: !Sub |
+  #           #!/bin/bash
+  #           sudo yum update -y
+  #           sudo amazon-linux-extras install epel -y
+  #           sudo yum install stress -y
+  #           sudo yum install -y git
+  #           sudo yum install -y curl
+  #           sudo yum install mariadb -y
+  #           mysql --version
+  #           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+  #           export NVM_DIR="$HOME/.nvm"
+  #           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  #           nvm install 16.0.0
+  #           sudo git clone https://github.com/TylerKuick/ECP_Website
             
-            cd ./ECP_Website/back-end
+  #           cd ./ECP_Website/back-end
             
-            export DBHOST=$(aws rds describe-db-instances --db-instance-identifier ecp-rds --query 'DBInstances[0].Endpoint.Address' --region us-east-1 --output text)
-            mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" -e "CREATE DATABASE ecp_dev;"
-            echo "'$DBHOST'" | sudo tee -a .env
+  #           export DBHOST=$(aws rds describe-db-instances --db-instance-identifier ecp-rds --query 'DBInstances[0].Endpoint.Address' --region us-east-1 --output text)
+  #           mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" -e "CREATE DATABASE ecp_dev;"
+  #           echo "'$DBHOST'" | sudo tee -a .env
 
-            sudo chmod +x node_modules/.bin/nodemon
-            npm i 
-            npm install pm2 -g
-            pm2 start index.js
+  #           sudo chmod +x node_modules/.bin/nodemon
+  #           npm i 
+  #           npm install pm2 -g
+  #           pm2 start index.js
 
-  AppASG:
-    Type: AWS::AutoScaling::AutoScalingGroup
-    DeletionPolicy: Delete
-    Properties:
-      MinSize: '2'
-      MaxSize: '2'
-      DesiredCapacity: '2'
-      LaunchTemplate:
-        LaunchTemplateId: !Ref AppServerLaunchTemplate
-        Version: !GetAtt AppServerLaunchTemplate.LatestVersionNumber
-      HealthCheckType: ELB
-      VPCZoneIdentifier:
-        - !Ref PrivateSubnet1
-        - !Ref PrivateSubnet2
-      TargetGroupARNs: 
-        - !Ref AppTargetGroup
+  # AppASG:
+  #   Type: AWS::AutoScaling::AutoScalingGroup
+  #   DeletionPolicy: Delete
+  #   Properties:
+  #     MinSize: '2'
+  #     MaxSize: '2'
+  #     DesiredCapacity: '2'
+  #     LaunchTemplate:
+  #       LaunchTemplateId: !Ref AppServerLaunchTemplate
+  #       Version: !GetAtt AppServerLaunchTemplate.LatestVersionNumber
+  #     HealthCheckType: ELB
+  #     VPCZoneIdentifier:
+  #       - !Ref PrivateSubnet1
+  #       - !Ref PrivateSubnet2
+  #     TargetGroupARNs: 
+  #       - !Ref AppTargetGroup
 
-  AppScalingPolicy:
-    Type: 'AWS::AutoScaling::ScalingPolicy'
-    Properties:
-      PolicyType: TargetTrackingScaling
-      AdjustmentType: ChangeInCapacity
-      AutoScalingGroupName: !Ref AppASG
-      TargetTrackingConfiguration: 
-        PredefinedMetricSpecification: 
-          PredefinedMetricType: ASGAverageCPUUtilization
-        TargetValue: 20
+  # AppScalingPolicy:
+  #   Type: 'AWS::AutoScaling::ScalingPolicy'
+  #   Properties:
+  #     PolicyType: TargetTrackingScaling
+  #     AdjustmentType: ChangeInCapacity
+  #     AutoScalingGroupName: !Ref AppASG
+  #     TargetTrackingConfiguration: 
+  #       PredefinedMetricSpecification: 
+  #         PredefinedMetricType: ASGAverageCPUUtilization
+  #       TargetValue: 20
 
-  AppTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      VpcId: !Ref EcpProjectVPC
-      TargetType: instance
-      HealthCheckPath: /
-      HealthCheckTimeoutSeconds: 110
-      HealthCheckIntervalSeconds: 120
-      Port: 3001
-      Protocol: HTTP
-      Tags:
-        - Key: Name
-          Value: AppTG
+  # AppTargetGroup:
+  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  #   Properties:
+  #     VpcId: !Ref EcpProjectVPC
+  #     TargetType: instance
+  #     HealthCheckPath: /
+  #     HealthCheckTimeoutSeconds: 110
+  #     HealthCheckIntervalSeconds: 120
+  #     Port: 3001
+  #     Protocol: HTTP
+  #     Tags:
+  #       - Key: Name
+  #         Value: AppTG
 
-  AppALB:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Type: application
-      Scheme: internal
-      Name: AppALB
-      SecurityGroups:
-      - !Ref AppServerSecurityGroup
-      Subnets: 
-      - !Ref PrivateSubnet1
-      - !Ref PrivateSubnet2
-      Tags:
-        - Key: Name
-          Value: AppALB
+  # AppALB:
+  #   Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+  #   Properties:
+  #     Type: application
+  #     Scheme: internal
+  #     Name: AppALB
+  #     SecurityGroups:
+  #     - !Ref AppServerSecurityGroup
+  #     Subnets: 
+  #     - !Ref PrivateSubnet1
+  #     - !Ref PrivateSubnet2
+  #     Tags:
+  #       - Key: Name
+  #         Value: AppALB
 
-  AppALBListener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      Protocol: HTTP
-      Port: 80
-      DefaultActions:
-        - Type: forward
-          TargetGroupArn: !Ref AppTargetGroup
-      LoadBalancerArn: !Ref AppALB
+  # AppALBListener:
+  #   Type: AWS::ElasticLoadBalancingV2::Listener
+  #   Properties:
+  #     Protocol: HTTP
+  #     Port: 80
+  #     DefaultActions:
+  #       - Type: forward
+  #         TargetGroupArn: !Ref AppTargetGroup
+  #     LoadBalancerArn: !Ref AppALB
       
+  # Lambda Functions and Security Groups 
+  getProducts:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function to get all products from RDS
+      FunctionName: getProducts
+      Code: 
+        S3Bucket: Sub! | ${BucketName}/product
+        S3Key: product/getProducts.py
+      Handler: getProducts.lambda_handler
+      Role: String
+      Runtime: python3.11
+      Timeout: 60
+      VpcConfig: 
+        SecurityGroupIds: 
+        - !Ref WebServerSecurityGroup
+        SubnetIds: 
+        - !Ref PublicSubnet1 
+        - !Ref PublicSubnet2 
+        - !Ref PrivateSubnet1 
+        - !Ref PrivateSubnet2 
+        - !Ref DBSubnet1 
+        - !Ref DBSubnet2
+
