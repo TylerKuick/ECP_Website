@@ -14,9 +14,12 @@ def lambda_handler(event, context):
 
     connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
     cursor = connection.cursor()
-    result = []
+    id_str = event.get("id")
     if (cursor): 
-        query = "SELECT * FROM Products" 
+        if id_str is not None | "":
+            query = f"SELECT * FROM Products WHERE ID={id_str}" 
+        else: 
+            query = "SELECT * FROM Products" 
         cursor.execute(query)
         rows = cursor.fetchall()
     else:
