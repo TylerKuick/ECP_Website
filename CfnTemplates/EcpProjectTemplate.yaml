@@ -224,7 +224,7 @@ Resources:
             mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" ecp_dev < /ECP_Website/db_dump/ecp_dev_cartitems.sql
 
             #Copy Lambda Functions to S3 Bucket
-            aws s3 cp /ECP_Website/lambda_functions s3://${BucketName} --recursive     
+            aws s3 cp /ECP_Website/lambda_functions/zip_files s3://${BucketName} --recursive     
             
             #Terminate instance after setup is done
             sudo shutdown now -h
