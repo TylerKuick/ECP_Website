@@ -2,7 +2,6 @@ import pymysql
 import json
 import boto3
 
-
 def lambda_handler(event, context):
     rds = boto3.client('rds')
     rds_obj = rds.describe_db_instances(DBInstanceIdentifier="ecp-rds")
@@ -11,18 +10,18 @@ def lambda_handler(event, context):
     username = "admin" 
     password = "password" 
     database_name = "ecp_dev" 
+    try: 
+        connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
+        cursor = connection.cursor()
+        id_str = event.get("id")
 
-    connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
-    cursor = connection.cursor()
-    id_str = event.get("id")
-    if (cursor): 
-        if id_str is not None | "":
-            query = f"SELECT * FROM Products WHERE ID={id_str}" 
+        if id_str is not None:
+            query = f"SELECT * FROM products WHERE ID={id_str}" 
         else: 
-            query = "SELECT * FROM Products" 
+            query = "SELECT * FROM products" 
         cursor.execute(query)
         rows = cursor.fetchall()
-    else:
+    except:
         rows = "Error with connection.cursor()"
     cursor.close()
     connection.close()

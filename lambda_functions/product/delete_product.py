@@ -10,21 +10,24 @@ def lambda_handler(event, context):
     username = "admin" 
     password = "password" 
     database_name = "ecp_dev" 
-
-    connection = pymysql.connect(endpoint, user=username, passwd=password, db=database_name)
-    cursor = connection.cursor()
-    id_str = event.get("id")
-    if (cursor): 
+    try: 
+        connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
+        cursor = connection.cursor()
+        id_str = event.get("id")
+        
         if id_str is not None | "":
-            query = f"DELETE FROM Products WHERE ID={id_str}" 
-            cursor.execute(query)
-        rows = "No id_str found"
-    else: 
-        rows = "Error with connection.cursor()"
+            query = "DELETE FROM products WHERE ID=%s" 
+            cursor.execute(query, (id_str))
+            connection.commit()
+            result = "Deleted Successfully"
+        else: 
+            result = "No id_str found"
+    except: 
+        result = "Delete Failed"
     cursor.close()
     connection.close()
 
     return {
         'statusCode': 200,
-        'body': json.dumps(f"{rows}")
+        'body': json.dumps(f"{result}")
     }

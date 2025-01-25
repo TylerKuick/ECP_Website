@@ -11,18 +11,19 @@ def lambda_handler(event, context):
     password = "password" 
     database_name = "ecp_dev" 
     result = ""
-
-    connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
-    cursor = connection.cursor()
-    if (cursor): 
-        query = "INSERT INTO Products (prod_name, prod_price, description) VALUES(%s, %s, %s)" 
+    try: 
+        connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
+        cursor = connection.cursor()
+        
+        query = "INSERT INTO products (prod_name, prod_price, description) VALUES(%s, %s, %s)" 
         cursor.execute(query, (event['prod_name'], event['prod_price'],event['description']))
         connection.commit()
-        result = "Success"
-    else: 
-        result = "Failed"
-    cursor.close()
-    connection.close()
+        result = "Post Successfully"
+        
+        cursor.close()
+        connection.close()
+    except: 
+        result = "Post Failed"
     return {
         'statusCode': 200,
         'body': json.dumps(f"{result}")
