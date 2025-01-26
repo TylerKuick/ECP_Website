@@ -27,6 +27,8 @@ def lambda_handler(event, context):
         connection.commit()
 
         result  = "Updated Successfully"
+        
+        connection.close()
         return {
             'statusCode': 200,
             'body': json.dumps(f"{result}")

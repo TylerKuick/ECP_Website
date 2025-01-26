@@ -32,7 +32,8 @@ def lambda_handler(event, context):
         query = "SELECT * FROM products" 
         cursor.execute(query)
         rows = cursor.fetchall()
-    
+        
+        connection.close()
         return {
             'statusCode': 200,
             'body': json.dumps(rows, default=custom_serializer)

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Grid, Card, CardContent, IconButton, TextField, Button, CardMedia } from '@mui/material';
+import { Box, Typography, Grid2, Card, CardContent, IconButton, TextField, Button, CardMedia } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Search, Clear } from '@mui/icons-material';
 import http from '../http';

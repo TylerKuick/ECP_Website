@@ -27,6 +27,8 @@ def lambda_handler(event, context):
         cursor.execute(query, (id_str))
         connection.commit()
         result = "Deleted Successfully"
+        
+        connection.close()
         return {
             'statusCode': 200,
             'body': json.dumps(f"{result}")
