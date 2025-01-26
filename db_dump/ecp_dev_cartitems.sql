@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS `cartitems`;
 CREATE TABLE `cartitems` (
   `id` int NOT NULL AUTO_INCREMENT,
   `quantity` int NOT NULL,
-  `total` decimal(10,0) NOT NULL,
+  `total` varchar(255) NOT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `CartId` int DEFAULT NULL,

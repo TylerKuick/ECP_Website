@@ -29,7 +29,7 @@ CREATE TABLE `carts` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `CustomerId` int DEFAULT NULL,
-  `total` decimal(10,0) DEFAULT NULL,
+  `total` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `CustomerId` (`CustomerId`),
   CONSTRAINT `Carts_CustomerId_foreign_idx` FOREIGN KEY (`CustomerId`) REFERENCES `customers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,

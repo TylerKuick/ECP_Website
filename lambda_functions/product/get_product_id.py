@@ -17,7 +17,7 @@ def lambda_handler(event, context):
     id_str = event.get("id")
     query = "SELECT * FROM products WHERE id=%s" 
     cursor.execute(query, (id_str))
-    rows = cursor.fetchall()
+    rows = cursor.fetchone()
 
     cursor.close()
     connection.close()

@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS `products`;
 CREATE TABLE `products` (
   `id` int NOT NULL AUTO_INCREMENT,
   `prod_name` varchar(255) NOT NULL,
-  `prod_price` decimal(3,2) NOT NULL,
+  `prod_price` varchar(10) NOT NULL,
   `description` text NOT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'Apple',5.00,'An apple','2024-12-19 15:20:06','2024-12-19 15:20:06'),(2,'Grape',8.00,'A grape','2024-12-26 18:32:22','2024-12-26 18:32:22'),(3,'Orange',5.20,'An orange','2024-12-26 18:35:26','2024-12-26 18:35:26');
+INSERT INTO `products` VALUES (1,'Apple',"5.00",'An apple','2024-12-19 15:20:06','2024-12-19 15:20:06'),(2,'Grape',"8.00",'A grape','2024-12-26 18:32:22','2024-12-26 18:32:22'),(3,'Orange',"5.20",'An orange','2024-12-26 18:35:26','2024-12-26 18:35:26');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

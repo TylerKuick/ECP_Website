@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     username = "admin" 
     password = "password" 
     database_name = "ecp_dev" 
-    
+    result = []
     connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
     cursor = connection.cursor()
 
