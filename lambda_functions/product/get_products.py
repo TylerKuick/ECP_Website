@@ -17,17 +17,34 @@ def lambda_handler(event, context):
     password = "password" 
     database_name = "ecp_dev" 
     
-    connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
-
-    query = "SELECT * FROM products" 
-    cursor.execute(query)
-    rows = cursor.fetchall()
+    try: 
+        connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
+    except Exception as e: 
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": f"Database connection failed: {str(e)}"})
+        }
     
-    cursor.close()
-    connection.close()
+    try: 
+        connection.ping(reconnect=True)
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        
+        query = "SELECT * FROM products" 
+        cursor.execute(query)
+        rows = cursor.fetchall()
     
-    return {
-        'statusCode': 200,
-        'body': json.dumps(rows, default=custom_serializer)
-    }
+        return {
+            'statusCode': 200,
+            'body': json.dumps(rows, default=custom_serializer)
+        }
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": f"Failed to fetch data: {str(e)}"})
+        }
+    finally:
+        if connection: 
+            connection.close()
+            print("Connection closed")
+        
+    

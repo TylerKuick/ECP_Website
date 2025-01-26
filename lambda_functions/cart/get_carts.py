@@ -1,15 +1,29 @@
 import pymysql
-import boto3
 import json
+import boto3
+from datetime import datetime
+
+def custom_serializer(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    
 
 def lambda_handler(event, context):
     rds = boto3.client('rds')
     rds_obj = rds.describe_db_instances(DBInstanceIdentifier="ecp-rds")
-
+    
     endpoint = rds_obj['DBInstances'][0]["Endpoint"]["Address"] # get using boto3
-    username = "admin" 
+    username = "admin"
     password = "password" 
     database_name = "ecp_dev" 
+    
+    query_params = event.get("queryStringParameters", {})
+    search_query = query_params.get('search')
+    if not search_query: 
+        query = "SELECT * FROM carts"
+    else: 
+        query = f"SELECT * FROM carts WHERE CustomerId={search_query}"
+
     try: 
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
     except Exception as e: 
@@ -17,19 +31,17 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": f"Database connection failed: {str(e)}"})
         }
-    try:
+    
+    try: 
         connection.ping(reconnect=True)
-        cursor = connection.cursor()
-        id_str = event.get("id")
-        
-        query = "UPDATE products SET prod_name=%s prod_price=%s description=%s WHERE ID=%s" 
-        cursor.execute(query, (event['prod_name'], event['prod_price'],event['description'], (id_str)))
-        connection.commit()
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+    
+        cursor.execute(query)
+        rows = cursor.fetchall()
 
-        result  = "Updated Successfully"
         return {
-            'statusCode': 200,
-            'body': json.dumps(f"{result}")
+        'statusCode': 200,
+        'body': json.dumps(rows, default=custom_serializer)
         }
     except Exception as e:
         return {
@@ -39,3 +51,5 @@ def lambda_handler(event, context):
     finally:
         if connection: 
             connection.close()
+        
+    

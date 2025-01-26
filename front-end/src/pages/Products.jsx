@@ -29,16 +29,18 @@ function Products() {
 
     const getProducts = () => {
         http.get('/products').then((res)=> {
-            var prod_list_final = []
-            var json_res = JSON.parse(res.data['body'])
-            var prod_list = json_res.slice(1,-2).replaceAll('}, {', '}|{').split('|')
-            prod_list.forEach((prod) => {
-                prod_list_final.push(JSON.parse(prod.replaceAll("\'", '"')))
-            })
-            console.log(prod_list)
-            setProductList(prod_list)
+            var json_res = JSON.parse(res.data['body']);
+            setProductList(json_res);
+            console.log(productList)
         });
     };
+
+    const deleteProduct = (id) => {
+        let data = {
+            "id": id
+        }
+        http.delete(`/products`, data);
+    }
 
     // Search Products 
     const [search, setSearch] = useState('');
@@ -115,6 +117,9 @@ function Products() {
                                         <Button variant="contained"  sx={{mt: 2}}
                                         onClick={() => addToCart(product, 1)}>
                                             Add To Cart
+                                        </Button>
+                                        <Button color="error" onClick={() => deleteProduct(product.id)}>
+                                            <Delete/>
                                         </Button>
                                     </CardContent>
                                 </Card>

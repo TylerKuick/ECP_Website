@@ -13,21 +13,29 @@ def lambda_handler(event, context):
     result = ""
     try: 
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
-        cursor = connection.cursor()
+    except Exception as e: 
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": f"Database connection failed: {str(e)}"})
+        }
+    try:     
+        connection.ping(reconnect=True)
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
         
         query = "INSERT INTO products (prod_name, prod_price, description, createdAt, updatedAt) VALUES(%s, %s, %s,now(),now())" 
         cursor.execute(query, (event['prod_name'], event['prod_price'],event['description']))
         connection.commit()
         result = "Post Success"
         
-        cursor.close()
-        connection.close()
+        return {
+            'statusCode': 201,
+            'body': json.dumps(f"{result}")
+        }
     except Exception as e:
         return {
-            'statusCode': 500,
-            'body': json.dumps(f"{e}")
+            "statusCode": 500,
+            "body": json.dumps({"error": f"Failed to fetch data: {str(e)}"})
         }
-    return {
-        'statusCode': 200,
-        'body': json.dumps(f"{result}")
-    }
+    finally:
+        if connection: 
+            connection.close()
