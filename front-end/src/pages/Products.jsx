@@ -29,8 +29,14 @@ function Products() {
 
     const getProducts = () => {
         http.get('/products').then((res)=> {
-            setProductList(res.data);
-            console.log(res.data["body"])
+            var prod_list_final = []
+            var json_res = JSON.parse(res.data['body'])
+            var prod_list = json_res.slice(1,-2).replaceAll('}, {', '}|{').split('|')
+            prod_list.forEach((prod) => {
+                prod_list_final.push(JSON.parse(prod.replaceAll("\'", '"')))
+            })
+            console.log(prod_list)
+            setProductList(prod_list)
         });
     };
 
@@ -58,12 +64,6 @@ function Products() {
     const onClickClear = () => {
         setSearch("");
         getProducts();
-    }
-
-    const onClickAddProduct = () => {
-        let data = {
-
-        } 
     }
     
     // Initialization

@@ -1,7 +1,12 @@
 import pymysql
 import json
 import boto3
+from datetime import datetime
 
+def custom_serializer(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    
 
 def lambda_handler(event, context):
     rds = boto3.client('rds')
@@ -22,9 +27,7 @@ def lambda_handler(event, context):
     cursor.close()
     connection.close()
     
-    for row in rows:
-        print(row)
     return {
         'statusCode': 200,
-        'body': json.dumps(rows)
+        'body': json.dumps(rows, default=custom_serializer)
     }

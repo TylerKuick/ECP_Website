@@ -22,7 +22,7 @@ Resources:
         S3Key: product/get_products.zip
       Handler: get_products.lambda_handler
       Runtime: python3.11
-      Timeout: 60
+      Timeout: 10
       VpcConfig: 
         SecurityGroupIds: 
         - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
@@ -44,7 +44,7 @@ Resources:
         S3Key: product/post_products.zip
       Handler: post_products.lambda_handler
       Runtime: python3.11
-      Timeout: 60
+      Timeout: 10
       VpcConfig: 
         SecurityGroupIds: 
         - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
@@ -66,7 +66,7 @@ Resources:
         S3Key: product/put_product.zip
       Handler: put_product.lambda_handler
       Runtime: python3.11
-      Timeout: 60
+      Timeout: 10
       VpcConfig: 
         SecurityGroupIds: 
         - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
@@ -88,7 +88,7 @@ Resources:
         S3Key: product/delete_product.zip
       Handler: delete_product.lambda_handler
       Runtime: python3.11
-      Timeout: 60
+      Timeout: 10
       VpcConfig: 
         SecurityGroupIds: 
         - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
