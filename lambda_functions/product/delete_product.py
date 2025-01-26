@@ -14,19 +14,18 @@ def lambda_handler(event, context):
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
         cursor = connection.cursor()
         id_str = event.get("id")
-        
-        if id_str is not None | "":
-            query = "DELETE FROM products WHERE ID=%s" 
-            cursor.execute(query, (id_str))
-            connection.commit()
-            result = "Deleted Successfully"
-        else: 
-            result = "No id_str found"
-    except: 
-        result = "Delete Failed"
-    cursor.close()
-    connection.close()
 
+        query = "DELETE FROM products WHERE ID=%s" 
+        cursor.execute(query, (id_str))
+        connection.commit()
+        result = "Deleted Successfully"
+        cursor.close()
+        connection.close()
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f"{e}")
+        }
     return {
         'statusCode': 200,
         'body': json.dumps(f"{result}")

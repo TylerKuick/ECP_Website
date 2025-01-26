@@ -15,17 +15,18 @@ def lambda_handler(event, context):
         cursor = connection.cursor()
         id_str = event.get("id")
         
-        if id_str is not None | "":
-            query = "UPDATE products SET prod_name=%s prod_price=%s description=%s WHERE ID=%s" 
-            cursor.execute(query, (event['prod_name'], event['prod_price'],event['description'], (id_str)))
-            connection.commit()
-            result  = "Updated Successfully"
-        else: 
-            result = "No id_str found"
-    except: 
-        result = "Update Failed"
-    cursor.close()
-    connection.close()
+        query = "UPDATE products SET prod_name=%s prod_price=%s description=%s WHERE ID=%s" 
+        cursor.execute(query, (event['prod_name'], event['prod_price'],event['description'], (id_str)))
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+        result  = "Updated Successfully"
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f"{e}")
+        }
     return {
         'statusCode': 200,
         'body': json.dumps(f"{result}")

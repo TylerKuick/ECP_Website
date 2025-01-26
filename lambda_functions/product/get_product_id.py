@@ -11,15 +11,14 @@ def lambda_handler(event, context):
     username = "admin" 
     password = "password" 
     database_name = "ecp_dev" 
-
+    
     connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
     cursor = connection.cursor()
-    if (cursor): 
-        query = "SELECT * FROM Products WHERE ID=%s" 
-        cursor.execute(query, event.get('id'))
-        rows = cursor.fetchall()
-    else:
-        rows = "Error with connection.cursor()"
+    id_str = event.get("id")
+    query = "SELECT * FROM products WHERE id=%s" 
+    cursor.execute(query, (id_str))
+    rows = cursor.fetchall()
+
     cursor.close()
     connection.close()
 

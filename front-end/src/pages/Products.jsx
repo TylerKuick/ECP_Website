@@ -30,6 +30,7 @@ function Products() {
     const getProducts = () => {
         http.get('/products').then((res)=> {
             setProductList(res.data);
+            console.log(res.data["body"])
         });
     };
 
