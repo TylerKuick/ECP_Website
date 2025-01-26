@@ -8,12 +8,12 @@ def lambda_handler(event, context):
     rds_obj = rds.describe_db_instances(DBInstanceIdentifier="ecp-rds")
     
     endpoint = rds_obj['DBInstances'][0]["Endpoint"]["Address"] # get using boto3
-    username = "admin" 
+    username = "admin"
     password = "password" 
     database_name = "ecp_dev" 
-    result = []
+    
     connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
-    cursor = connection.cursor()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     query = "SELECT * FROM products" 
     cursor.execute(query)
@@ -21,7 +21,10 @@ def lambda_handler(event, context):
     
     cursor.close()
     connection.close()
+    
+    for row in rows:
+        print(row)
     return {
         'statusCode': 200,
-        'body': json.dumps(f"{rows}")
+        'body': json.dumps(rows)
     }

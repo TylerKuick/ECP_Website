@@ -13,7 +13,7 @@ def lambda_handler(event, context):
     database_name = "ecp_dev" 
     
     connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
-    cursor = connection.cursor()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
     id_str = event.get("id")
     query = "SELECT * FROM products WHERE id=%s" 
     cursor.execute(query, (id_str))
