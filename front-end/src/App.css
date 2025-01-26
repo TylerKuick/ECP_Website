@@ -1,3 +1,4 @@
+/* AppBar styles */
 .AppBar a {
   color: inherit;
   text-decoration: none;
@@ -15,9 +16,105 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* Links with consistent hover behavior */
+.link {
+  text-decoration: none;
+  color: white;
+}
+
+.link:hover {
+  color: lightblue;
+}
+
+/* Home Page styles */
+.home-container {
+  text-align: center;
+  margin-top: 4rem;
+}
+
+.home-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.home-hero p {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+.home-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.home-buttons .btn {
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.home-buttons .btn-primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.home-buttons .btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.home-buttons .btn-secondary {
+  background-color: white;
+  color: #007bff;
+  border: 2px solid #007bff;
+}
+
+.home-buttons .btn-secondary:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Info box section */
+.info-box {
+  margin-top: 3rem;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.info-box h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.info-box p {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .home-hero h1 {
+    font-size: 2rem;
   }
 
-  .link {
-    text-decoration: none;
-    color: white;
+  .home-hero p {
+    font-size: 1rem;
   }
+
+  .home-buttons .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .info-box {
+    padding: 1.5rem;
+  }
+}
