@@ -175,7 +175,7 @@ Resources:
       Role: arn:aws:iam::638821506583:role/LabRole
       Code: 
         S3Bucket: !Ref S3Bucket
-        S3Key: cart/post_cart_item.zip
+        S3Key: cart/post_cart_items.zip
       Handler: post_cart_item.lambda_handler
       Runtime: python3.11
       Timeout: 10
@@ -197,7 +197,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Description: Lambda function to delete cart items from RDS
-      FunctionName: postCartItem
+      FunctionName: deleteCartItem
       Role: arn:aws:iam::638821506583:role/LabRole
       Code: 
         S3Bucket: !Ref S3Bucket

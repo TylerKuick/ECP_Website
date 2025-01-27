@@ -355,7 +355,7 @@ Resources:
       TargetTrackingConfiguration: 
         PredefinedMetricSpecification: 
           PredefinedMetricType: ASGAverageCPUUtilization
-        TargetValue: 20
+        TargetValue: 50
 
   WebALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -512,18 +512,6 @@ Resources:
   #       - Type: forward
   #         TargetGroupArn: !Ref AppTargetGroup
   #     LoadBalancerArn: !Ref AppALB
-      
-  # Waiter
-  MyWaitHandle:
-    Type: AWS::CloudFormation::WaitConditionHandle
-
-  MyWaitCondition:
-    Type: AWS::CloudFormation::WaitCondition
-    DependsOn: SetupLambdaRDSEC2Instance
-    Properties:
-      Handle: !Ref MyWaitHandle
-      Timeout: '4500'
-
 
 Outputs: 
   S3Bucket: 
