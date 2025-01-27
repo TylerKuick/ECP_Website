@@ -357,7 +357,7 @@ Resources:
     Type: "AWS::ApiGateway::Method"
     Properties:
       RestApiId: !Ref ApiGateway
-      ResourceId: !Ref CartByIDResource
+      ResourceId: !Ref CartItemsResource
       HttpMethod: "GET"
       AuthorizationType: "NONE"
       Integration:
@@ -377,7 +377,7 @@ Resources:
     Type: "AWS::ApiGateway::Method"
     Properties:
       RestApiId: !Ref ApiGateway
-      ResourceId: !Ref CartByIDResource
+      ResourceId: !Ref CartItemsResource
       HttpMethod: "POST"
       AuthorizationType: "NONE"
       Integration:

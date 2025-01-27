@@ -301,9 +301,9 @@ Resources:
             git clone https://github.com/TylerKuick/ECP_Website
 
             #Set Backend API URL to API Gateway
-            export API_ID=$(aws apigateway get-rest-apis --query "items[0].id" --region us-east-1 --output text)
-            export API_URL="https://$API_ID.execute-api.us-east-1.amazonaws.com/dev"
-            echo "'$API_URL'" | sudo tee -a .env
+            #export API_ID=$(aws apigateway get-rest-apis --query "items[0].id" --region us-east-1 --output text)
+            #export API_URL="https://$API_ID.execute-api.us-east-1.amazonaws.com/dev"
+            #echo "'$API_URL'" | sudo tee -a .env
             
             #Build and copy files to Apache Server files
             cd ./ECP_Website/front-end
