@@ -12,19 +12,20 @@ function Products() {
     const [cartId, setCartId] = useState('');
 
     const getCartID = () => {
-        http.get(`/cart?search=${custId}`).then((res) => {
-            setCartId(res.data[0].id);
+        http.get(`/carts?search=${custId}`).then((res) => {
+            var json_res = JSON.parse(res.data['body'])
+            setCartId(json_res[0].id);
+            console.log(json_res[0].id)
         })
     }
 
     const addToCart = (product, qty) => {
         let data = {
             "ProductId": product.id,
-            "CartId": cartId,
             "quantity": qty,
             "total": (product.prod_price * qty),
         };
-        http.post(`/cart/${cartId}/items`, data);
+        http.post(`/carts/${cartId}/items`, data);
     }
 
     const getProducts = () => {
@@ -36,7 +37,9 @@ function Products() {
     };
 
     const deleteProduct = (id) => {
-        http.delete(`/products/${id}`);
+        http.delete(`/products/${id}`).then(()=> {
+            getProducts();
+        });
     }
 
     // Search Products 

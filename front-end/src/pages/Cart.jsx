@@ -21,20 +21,25 @@ function Cart() {
 
   const getProductList = () => {
     http.get('/products').then((res) => {
-      setProductList(res.data);
+      var json_res = JSON.parse(res.data['body'])
+      setProductList(json_res);
+      console.log(json_res)
     });
   };
 
   const getCartId = () => {
-    http.get(`/cart?search=${custId}`).then((res) => {
-      setCartId(res.data[0]?.id || '');
+    http.get(`/carts?search=${custId}`).then((res) => {
+      var json_res = JSON.parse(res.data['body'])
+      setCartId(json_res[0]?.id || '');
+      console.log(json_res[0]?.id)
     });
   };
 
   const getCartItems = () => {
     if (cartId) {
-      http.get(`/cart/${cartId}/items`).then((res) => {
+      http.get(`/carts/${cartId}/items`).then((res) => {
         setCartItems(res.data);
+        console.log(res.data)
       });
     }
   };
@@ -49,13 +54,13 @@ function Cart() {
 
   const onClickClearCart = () => {
     cartItems.forEach((item) => {
-      http.delete(`/cart/${cartId}/items/${item.id}`);
+      http.delete(`/carts/${cartId}/items/${item.id}`);
     });
     setCartItems([]);
   };
 
   const deleteItem = (id) => {
-    http.delete(`/cart/${cartId}/items/${id}`).then(() => {
+    http.delete(`/carts/${cartId}/items/${id}`).then(() => {
       getCartItems();
     });
   };
@@ -87,14 +92,14 @@ function Cart() {
           return (
             <Grid item xs={12} sm={6} md={4} key={citem.id}>
               <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                {product?.thumbnail && (
+                {/* {product?.thumbnail && (
                   <CardMedia
                     component="img"
                     height="140"
                     image={product.thumbnail}
                     alt={product.prod_name}
                   />
-                )}
+                )} */}
                 <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                     {product?.prod_name || 'Product Name'}
@@ -103,7 +108,7 @@ function Cart() {
                     Qty: {citem.quantity}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                    Total: ${citem.total.toFixed(2)}
+                    Total: ${citem.total}
                   </Typography>
                 </CardContent>
                 <Box sx={{ p: 2, textAlign: 'center' }}>
@@ -122,7 +127,7 @@ function Cart() {
       </Grid>
       <Box sx={{ mt: 4, textAlign: 'right' }}>
         <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-          Total: ${total.toFixed(2)}
+          Total: ${total}
         </Typography>
         <Button
           variant="contained"
