@@ -38,6 +38,3 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": f"Failed to fetch data: {str(e)}"})
         }
-    finally:
-        if connection: 
-            connection.close()

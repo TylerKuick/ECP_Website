@@ -17,7 +17,7 @@ Resources:
     Properties:
       Description: Lambda function to get all products from RDS
       FunctionName: getProducts
-      Role: arn:aws:iam::767397761895:role/LabRole
+      Role: arn:aws:iam::638821506583:role/LabRole
       Code: 
         S3Bucket: !Ref S3Bucket
         S3Key: product/get_products.zip
@@ -34,12 +34,15 @@ Resources:
         - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
         - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
         - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+      Environment:
+        Variables:
+          DB_HOST: "${ProjectStackName}-RDSEndpoint"
   postProducts:
     Type: AWS::Lambda::Function
     Properties:
       Description: Lambda function to post products to RDS
       FunctionName: postProducts
-      Role: arn:aws:iam::767397761895:role/LabRole
+      Role: arn:aws:iam::638821506583:role/LabRole
       Code: 
         S3Bucket: !Ref S3Bucket
         S3Key: product/post_products.zip
@@ -56,34 +59,40 @@ Resources:
         - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
         - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
         - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
-  putProducts:
-    Type: AWS::Lambda::Function
-    Properties:
-      Description: Lambda function to update products in RDS
-      FunctionName: putProduct
-      Role: arn:aws:iam::767397761895:role/LabRole
-      Code: 
-        S3Bucket: !Ref S3Bucket
-        S3Key: product/put_product.zip
-      Handler: put_product.lambda_handler
-      Runtime: python3.11
-      Timeout: 10
-      VpcConfig: 
-        SecurityGroupIds: 
-        - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
-        SubnetIds: 
-        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
-        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
-        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
-        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
-        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
-        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+      Environment:
+        Variables:
+          DB_HOST: "${ProjectStackName}-RDSEndpoint"
+  # putProducts:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     Description: Lambda function to update products in RDS
+  #     FunctionName: putProduct
+  #     Role: arn:aws:iam::638821506583:role/LabRole
+  #     Code: 
+  #       S3Bucket: !Ref S3Bucket
+  #       S3Key: product/put_product.zip
+  #     Handler: put_product.lambda_handler
+  #     Runtime: python3.11
+  #     Timeout: 10
+  #     VpcConfig: 
+  #       SecurityGroupIds: 
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
+  #       SubnetIds: 
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+  #     Environment:
+  #       Variables:
+  #         DB_HOST: "${ProjectStackName}-RDSEndpoint"
   deleteProducts:
     Type: AWS::Lambda::Function
     Properties:
       Description: Lambda function to delete products in RDS
       FunctionName: deleteProduct
-      Role: arn:aws:iam::767397761895:role/LabRole
+      Role: arn:aws:iam::638821506583:role/LabRole
       Code: 
         S3Bucket: !Ref S3Bucket
         S3Key: product/delete_product.zip
@@ -100,27 +109,198 @@ Resources:
         - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
         - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
         - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+      Environment:
+        Variables:
+          DB_HOST: "${ProjectStackName}-RDSEndpoint"
 
   # Cart Lambda Function
-  getCarts:
-    Type: AWS::Lambda::Function
+  # getCarts:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     Description: Lambda function to get cart objects in RDS
+  #     FunctionName: getCarts
+  #     Role: arn:aws:iam::638821506583:role/LabRole
+  #     Code: 
+  #       S3Bucket: !Ref S3Bucket
+  #       S3Key: cart/get_carts.zip
+  #     Handler: get_carts.lambda_handler
+  #     Runtime: python3.11
+  #     Timeout: 10
+  #     VpcConfig: 
+  #       SecurityGroupIds: 
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
+  #       SubnetIds: 
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
+  #       - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+
+  # API Gateway 
+  ApiGateway: 
+    Type: "AWS::ApiGateway::RestApi"
     Properties:
-      Description: Lambda function to get cart objects in RDS
-      FunctionName: getCarts
-      Role: arn:aws:iam::767397761895:role/LabRole
-      Code: 
-        S3Bucket: !Ref S3Bucket
-        S3Key: cart/get_carts.zip
-      Handler: get_carts.lambda_handler
-      Runtime: python3.11
-      Timeout: 10
-      VpcConfig: 
-        SecurityGroupIds: 
-        - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
-        SubnetIds: 
-        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
-        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
-        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
-        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
-        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
-        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+      Name: "ECP-Backend-API"
+      Description: "Backend for ShopEasy Site"
+
+  # Product Resources (CRUD)
+  ProductResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: "products"
+      RestApiId: !Ref ApiGateway
+  
+  GetProductMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ProductResource
+      HttpMethod: "GET"
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "GET"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${getProducts.Arn}/invocations
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  getProductsPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref getProducts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/GET/products
+      
+  PostProductMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ProductResource
+      HttpMethod: "POST"
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${postProducts.Arn}/invocations
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+          
+  postProductsPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref postProducts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/POST/products
+      
+  GetByIDResource: 
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !Ref ProductResource
+      PathPart: "{id}"
+      RestApiId: !Ref ApiGateway
+
+  DeleteProductMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref GetByIDResource
+      HttpMethod: "DELETE"
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "DELETE"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${deleteProducts.Arn}/invocations
+      RequestParameters:
+        method.request.path.id: true
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  deleteProductsPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref deleteProducts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/DELETE/products
+      
+  # Enable CORS
+  ProductCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ProductResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ProductIdCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ProductResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      StageName: "dev"
+    DependsOn: 
+      - GetProductMethod
+      - PostProductMethod
+      - DeleteProductMethod
+      - ProductCORSMethod
+      - ProductIdCORSMethod
+  
+  
+
+  
+

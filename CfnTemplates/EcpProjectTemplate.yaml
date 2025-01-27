@@ -255,7 +255,7 @@ Resources:
 
           #Copy Lambda Functions to S3 Bucket
           aws s3 cp /ECP_Website/lambda_functions s3://${BucketName} --recursive    
-
+          
           #Shutdown instance after setup
           sudo shutdown now -h
       Tags: 
@@ -271,7 +271,7 @@ Resources:
         ImageId: ami-04823729c75214919
         InstanceType: t2.micro
         IamInstanceProfile:
-          Arn: arn:aws:iam::767397761895:instance-profile/LabInstanceProfile
+          Arn: arn:aws:iam::638821506583:instance-profile/LabInstanceProfile
         KeyName: vockey
         NetworkInterfaces: 
           - DeviceIndex: 0
@@ -332,7 +332,7 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       MinSize: '2'
-      MaxSize: '2'
+      MaxSize: '4'
       DesiredCapacity: '2'
       LaunchTemplate:
         LaunchTemplateId: !Ref WebServerLaunchTemplate
@@ -348,12 +348,13 @@ Resources:
     Type: 'AWS::AutoScaling::ScalingPolicy'
     Properties:
       PolicyType: TargetTrackingScaling
+      EstimatedInstanceWarmup: 400
       AdjustmentType: ChangeInCapacity
       AutoScalingGroupName: !Ref WebASG
       TargetTrackingConfiguration: 
         PredefinedMetricSpecification: 
           PredefinedMetricType: ASGAverageCPUUtilization
-        TargetValue: 20
+        TargetValue: 10
 
   WebALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -599,3 +600,8 @@ Outputs:
     Value: !Ref DBSubnet2
     Export: 
       Name: !Sub "${AWS::StackName}-DBSubnet2"
+  RDSEndpoint:
+    Description: DB Endpoint Address
+    Value: !GetAtt MyRDSInstance.Endpoint.Address
+    Export: 
+      Name: !Sub "${AWS::StackName}-RDSEndpoint"

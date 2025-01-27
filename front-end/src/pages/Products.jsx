@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Grid2, Card, CardContent, IconButton, TextField, Button, CardMedia } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { Search, Clear } from '@mui/icons-material';
+import { Search, Clear, Delete} from '@mui/icons-material';
 import http from '../http';
 
 function Products() {
@@ -36,10 +36,7 @@ function Products() {
     };
 
     const deleteProduct = (id) => {
-        let data = {
-            "id": id
-        }
-        http.delete(`/products`, data);
+        http.delete(`/products/${id}`);
     }
 
     // Search Products 
@@ -133,7 +130,7 @@ function Products() {
                                     {product.prod_name}
                                 </Typography>
                                 <Typography variant="body1" sx={{ color: 'text.secondary', mb: 1 }}>
-                                    Price: ${product.prod_price.toFixed(2)}
+                                    Price: ${product.prod_price}
                                 </Typography>
                                 <Typography
                                     variant="body2"
@@ -150,8 +147,10 @@ function Products() {
                                     Add to Cart
                                 </Button>
                                 <Button 
+                                    sx={{mt:2}}
                                     variant="contained"
                                     color="error" 
+                                    fullWidth
                                     onClick={() => deleteProduct(product.id)}
                                 >
                                         <Delete/>

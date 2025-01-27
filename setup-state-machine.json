@@ -1,26 +1,12 @@
 {
   "Comment": "An example of creating a CloudFormation stack and waiting for completion.",
-  "StartAt": "Generate Template",
+  "StartAt": "Create Stack",
   "States": {
-    "Generate Template": {
-      "Comment": "Placeholder for a task state which starts a job. Replace with an API action.",
-      "Type": "Pass",
-      "Next": "Create Stack",
-      "Result": {
-        "AWSTemplateFormatVersion": "2010-09-09",
-        "Resources": {
-          "SQSQueue": {
-            "Type": "AWS::SQS::Queue"
-          }
-        }
-      },
-      "ResultPath": "$.template_body"
-    },
     "Create Stack": {
       "Type": "Task",
       "Parameters": {
-        "StackName.$": "States.Format('TestStack-{}',States.UUID())",
-        "TemplateBody.$": "States.JsonToString($.template_body)"
+        "StackName": "ProjectStack",
+        "TemplateURL": "https://ecpecommercebucket-202501.s3.us-east-1.amazonaws.com/EcpProjectTemplate.yaml"
       },
       "Resource": "arn:aws:states:::aws-sdk:cloudformation:createStack",
       "Next": "Wait 15 Seconds",
@@ -76,7 +62,7 @@
         {
           "Variable": "$.stack_status.Status",
           "StringEquals": "CREATE_COMPLETE",
-          "Next": "Stack Creation Successful"
+          "Next": "Create LambdaStack"
         },
         {
           "Variable": "$.stack_status.Status",
@@ -85,6 +71,27 @@
         }
       ],
       "Default": "Stack Creation Result Unknown"
+    },
+    "Create LambdaStack": {
+      "Type": "Task",
+      "Parameters": {
+        "StackName": "LambdaStack",
+        "TemplateURL": "https://ecpecommercebucket-202501.s3.us-east-1.amazonaws.com/LambdaTemplate.yaml"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:cloudformation:createStack",
+      "Next": "Stack Creation Successful",
+      "ResultPath": "$.stack_name",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "BackoffRate": 2,
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "JitterStrategy": "FULL"
+        }
+      ]
     },
     "Stack Creation Result Unknown": {
       "Type": "Fail",

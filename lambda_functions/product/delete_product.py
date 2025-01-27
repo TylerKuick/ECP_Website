@@ -1,15 +1,18 @@
 import pymysql
 import boto3
 import json
+import os
 
 def lambda_handler(event, context):
-    rds = boto3.client('rds')
-    rds_obj = rds.describe_db_instances(DBInstanceIdentifier="ecp-rds")
 
-    endpoint = rds_obj['DBInstances'][0]["Endpoint"]["Address"] # get using boto3
+    endpoint = os.environ['DB_HOST']
     username = "admin" 
     password = "password" 
     database_name = "ecp_dev" 
+
+    path_parameters = event.get("pathParameters")
+    product_id = path_parameters.get("id") if path_parameters else None
+
     try: 
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
     except Exception as e: 
@@ -19,16 +22,16 @@ def lambda_handler(event, context):
         }
     
     try: 
-        connection.ping(reconnect=True)
+        connection.ping(reconnect=False)
         cursor = connection.cursor()
-        id_str = event.get("id")
 
-        query = "DELETE FROM products WHERE ID=%s" 
-        cursor.execute(query, (id_str))
+        query = f"DELETE FROM products WHERE id={product_id}" 
+        cursor.execute(query)
         connection.commit()
-        result = "Deleted Successfully"
-        
+
+        cursor.close()
         connection.close()
+        result = "Deleted Successfully"
         return {
             'statusCode': 200,
             'body': json.dumps(f"{result}")
@@ -38,6 +41,3 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": f"Failed to fetch data: {str(e)}"})
         }
-    finally:
-        if connection: 
-            connection.close()

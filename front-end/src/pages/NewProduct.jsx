@@ -28,7 +28,7 @@ function NewProduct() {
             data.description = data.description.trim();
             http.post("/products", data).then((res) => {
                 console.log(res.data);
-                navigate("/");
+                navigate("/products");
             });
         }
     });

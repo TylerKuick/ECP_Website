@@ -39,6 +39,7 @@ def lambda_handler(event, context):
         cursor.execute(query)
         rows = cursor.fetchall()
 
+        connection.close()
         return {
         'statusCode': 200,
         'body': json.dumps(rows, default=custom_serializer)
@@ -48,8 +49,5 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": f"Failed to fetch data: {str(e)}"})
         }
-    finally:
-        if connection: 
-            connection.close()
         
     

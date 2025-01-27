@@ -1,6 +1,7 @@
 import pymysql
 import json
 import boto3
+import os
 from datetime import datetime
 
 def custom_serializer(obj):
@@ -9,10 +10,8 @@ def custom_serializer(obj):
     
 
 def lambda_handler(event, context):
-    rds = boto3.client('rds')
-    rds_obj = rds.describe_db_instances(DBInstanceIdentifier="ecp-rds")
     
-    endpoint = rds_obj['DBInstances'][0]["Endpoint"]["Address"] # get using boto3
+    endpoint = os.environ['DB_HOST']
     username = "admin"
     password = "password" 
     database_name = "ecp_dev" 
@@ -43,9 +42,6 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": f"Failed to fetch data: {str(e)}"})
         }
-    finally:
-        if connection: 
-            connection.close()
-            print("Connection closed")
         
+
     
