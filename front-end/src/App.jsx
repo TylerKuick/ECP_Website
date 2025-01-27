@@ -6,6 +6,8 @@ import Products from './pages/Products';
 import Cart from './pages/Cart';
 import NewProduct from './pages/NewProduct';
 import Home from './pages/Home';
+import ChatbotPage from './pages/ChatbotPage';
+
 
 function App() {
   return (
@@ -25,6 +27,9 @@ function App() {
               <Link to="/products">
                 <Typography>Products</Typography>
               </Link>
+              <Link to="/chatbot">
+                <Typography>Chatbot</Typography>
+              </Link>
               <Link to="/cart">
                 <ShoppingCart sx={{ width: '35px', height: '35px' }} />
               </Link>
@@ -36,6 +41,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/newProduct" element={<NewProduct />} />
         </Routes>
