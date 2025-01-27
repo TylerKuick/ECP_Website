@@ -319,9 +319,9 @@ Resources:
     Properties:
       VpcId: !Ref EcpProjectVPC
       TargetType: instance
-      HealthCheckPath: /index.html
+      HealthCheckPath: /
       HealthCheckTimeoutSeconds: 110
-      HealthCheckIntervalSeconds: 120
+      HealthCheckIntervalSeconds: 300
       Port: 80
       Protocol: HTTP
       Tags:
