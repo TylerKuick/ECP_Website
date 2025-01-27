@@ -1,18 +1,19 @@
 import pymysql
-import boto3
 import json
+import boto3
 import os
 
 def lambda_handler(event, context):
-
+    
     endpoint = os.environ['DB_HOST']
     username = "admin" 
     password = "password" 
     database_name = "ecp_dev" 
+    result = ""
 
     path_parameters = event.get("pathParameters")
-    product_id = path_parameters.get("id") if path_parameters else None
-
+    cart_id = path_parameters.get("id") if path_parameters else None
+    body = json.loads(event['body'])
     try: 
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
     except Exception as e: 
@@ -20,24 +21,25 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": f"Database connection failed: {str(e)}"})
         }
-    
-    try:
+    try:     
         connection.ping(reconnect=False)
-        cursor = connection.cursor()
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
         
-        query = "UPDATE products SET prod_name=%s prod_price=%s description=%s WHERE ID=%s" 
-        cursor.execute(query, (event['prod_name'], event['prod_price'],event['description'], product_id))
-        connection.commit()
+        query = "INSERT INTO cartitems (ProductId, CartId, quantity, total, createdAt, updatedAt) VALUES(%s, %s, %s, %s,now(),now())" 
+        cursor.execute(query, (body['ProductId'], cart_id ,body['quantity'], body['total']))
 
-        result  = "Updated Successfully"
+        connection.commit()
+        result = "Post Success"
         
+        cursor.close()
         connection.close()
         return {
-            'statusCode': 200,
+            'statusCode': 201,
             "headers": {
-                "Access-Control-Allow-Origin": "*",  # Allow all origins
-                "Access-Control-Allow-Methods": "GET,PUT,DELETE, OPTIONS",  # Allowed HTTP methods
-                "Access-Control-Allow-Headers": "Content-Type, Authorization"  # Allowed headers
+                "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+                "Access-Control-Allow-Methods": "GET,OPTIONS,POST",
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json"
             },
             'body': json.dumps(f"{result}")
         }

@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     database_name = "ecp_dev" 
 
     path_parameters = event.get("pathParameters")
-    product_id = path_parameters.get("id") if path_parameters else None
+    item_id = path_parameters.get("item-id") if path_parameters else None
 
     try: 
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
@@ -21,22 +21,22 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": f"Database connection failed: {str(e)}"})
         }
     
-    try:
+    try: 
         connection.ping(reconnect=False)
         cursor = connection.cursor()
         
-        query = "UPDATE products SET prod_name=%s prod_price=%s description=%s WHERE ID=%s" 
-        cursor.execute(query, (event['prod_name'], event['prod_price'],event['description'], product_id))
+        query = f"DELETE FROM cartitems WHERE id={item_id}" 
+        cursor.execute(query)
         connection.commit()
 
-        result  = "Updated Successfully"
-        
+        cursor.close()
         connection.close()
+        result = "Deleted Successfully"
         return {
             'statusCode': 200,
             "headers": {
                 "Access-Control-Allow-Origin": "*",  # Allow all origins
-                "Access-Control-Allow-Methods": "GET,PUT,DELETE, OPTIONS",  # Allowed HTTP methods
+                "Access-Control-Allow-Methods": "DELETE, OPTIONS",  # Allowed HTTP methods
                 "Access-Control-Allow-Headers": "Content-Type, Authorization"  # Allowed headers
             },
             'body': json.dumps(f"{result}")

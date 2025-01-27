@@ -25,7 +25,7 @@ def lambda_handler(event, context):
         connection.ping(reconnect=False)
         cursor = connection.cursor()
 
-        query = f"DELETE FROM products WHERE id={product_id}" 
+        query = f"DELETE FROM products WHERE ID={product_id}" 
         cursor.execute(query)
         connection.commit()
 
@@ -34,6 +34,11 @@ def lambda_handler(event, context):
         result = "Deleted Successfully"
         return {
             'statusCode': 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",  # Allow all origins
+                "Access-Control-Allow-Methods": "DELETE, OPTIONS",  # Allowed HTTP methods
+                "Access-Control-Allow-Headers": "Content-Type, Authorization"  # Allowed headers
+            },
             'body': json.dumps(f"{result}")
         }
     except Exception as e:
