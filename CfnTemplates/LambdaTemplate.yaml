@@ -36,7 +36,7 @@ Resources:
         - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
       Environment:
         Variables:
-          DB_HOST: "${ProjectStackName}-RDSEndpoint"
+          DB_HOST: {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectStackName}-RDSEndpoint"}}
   postProducts:
     Type: AWS::Lambda::Function
     Properties:
@@ -61,7 +61,7 @@ Resources:
         - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
       Environment:
         Variables:
-          DB_HOST: "${ProjectStackName}-RDSEndpoint"
+          DB_HOST: {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectStackName}-RDSEndpoint"}}
   # putProducts:
   #   Type: AWS::Lambda::Function
   #   Properties:
@@ -86,7 +86,8 @@ Resources:
   #       - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
   #     Environment:
   #       Variables:
-  #         DB_HOST: "${ProjectStackName}-RDSEndpoint"
+  #         DB_HOST: Fn::ImportValue: 
+#             !Sub "${ProjectStackName}-RDSEndpoint"
   deleteProducts:
     Type: AWS::Lambda::Function
     Properties:
@@ -111,31 +112,112 @@ Resources:
         - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
       Environment:
         Variables:
-          DB_HOST: "${ProjectStackName}-RDSEndpoint"
+          DB_HOST: {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectStackName}-RDSEndpoint"}}
 
   # Cart Lambda Function
-  # getCarts:
-  #   Type: AWS::Lambda::Function
-  #   Properties:
-  #     Description: Lambda function to get cart objects in RDS
-  #     FunctionName: getCarts
-  #     Role: arn:aws:iam::638821506583:role/LabRole
-  #     Code: 
-  #       S3Bucket: !Ref S3Bucket
-  #       S3Key: cart/get_carts.zip
-  #     Handler: get_carts.lambda_handler
-  #     Runtime: python3.11
-  #     Timeout: 10
-  #     VpcConfig: 
-  #       SecurityGroupIds: 
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
-  #       SubnetIds: 
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+  getCarts:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function to get cart objects in RDS
+      FunctionName: getCarts
+      Role: arn:aws:iam::638821506583:role/LabRole
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: cart/get_carts.zip
+      Handler: get_carts.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
+        SubnetIds: 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+      Environment:
+        Variables:
+          DB_HOST:  {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectStackName}-RDSEndpoint"}}
+
+  getCartItems:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function to get cart items from cart in RDS
+      FunctionName: getCartItems
+      Role: arn:aws:iam::638821506583:role/LabRole
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: cart/get_cart_items.zip
+      Handler: get_carts.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
+        SubnetIds: 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+      Environment:
+        Variables:
+          DB_HOST:  {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectStackName}-RDSEndpoint"}}
+
+  postCartItem:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function to add cart items into RDS
+      FunctionName: postCartItem
+      Role: arn:aws:iam::638821506583:role/LabRole
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: cart/post_cart_item.zip
+      Handler: post_cart_item.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
+        SubnetIds: 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+      Environment:
+        Variables:
+          DB_HOST:  {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectStackName}-RDSEndpoint"}}
+  
+  deleteCartItem:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function to delete cart items from RDS
+      FunctionName: postCartItem
+      Role: arn:aws:iam::638821506583:role/LabRole
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: cart/delete_cart_item.zip
+      Handler: delete_cart_item.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
+        SubnetIds: 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
+        - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
+      Environment:
+        Variables:
+          DB_HOST: {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectStackName}-RDSEndpoint"}}
 
   # API Gateway 
   ApiGateway: 
@@ -144,7 +226,8 @@ Resources:
       Name: "ECP-Backend-API"
       Description: "Backend for ShopEasy Site"
 
-  # Product Resources (CRUD)
+  # Resource Paths
+  # /products
   ProductResource:
     Type: "AWS::ApiGateway::Resource"
     Properties:
@@ -152,6 +235,48 @@ Resources:
       PathPart: "products"
       RestApiId: !Ref ApiGateway
   
+  # /products/{id}
+  GetByIDResource: 
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !Ref ProductResource
+      PathPart: "{id}"
+      RestApiId: !Ref ApiGateway
+
+  # /carts
+  CartResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: "carts"
+      RestApiId: !Ref ApiGateway
+  
+  # /carts/{id}
+  CartByIDResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !Ref CartResource
+      PathPart: "{id}"
+      RestApiId: !Ref ApiGateway
+  
+  # /carts/{id}/items
+  CartItemsResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !Ref CartByIDResource
+      PathPart: "items"
+      RestApiId: !Ref ApiGateway
+
+  # /carts/{id}/items/{item-id}
+  ItemsResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !Ref CartItemsResource
+      PathPart: "{item-id}"
+      RestApiId: !Ref ApiGateway
+
+  # Methods
+  # GET /product 
   GetProductMethod:
     Type: "AWS::ApiGateway::Method"
     Properties:
@@ -161,7 +286,7 @@ Resources:
       AuthorizationType: "NONE"
       Integration:
         IntegrationHttpMethod: "GET"
-        Type: "AWS_PROXY"
+        Type: "AWS"
         Uri: !Sub
           arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${getProducts.Arn}/invocations
       MethodResponses:
@@ -169,15 +294,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Origin: true
 
-  getProductsPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName: !Ref getProducts
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub
-        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/GET/products
-      
+  # POST /product
   PostProductMethod:
     Type: "AWS::ApiGateway::Method"
     Properties:
@@ -187,30 +304,15 @@ Resources:
       AuthorizationType: "NONE"
       Integration:
         IntegrationHttpMethod: "POST"
-        Type: "AWS_PROXY"
+        Type: "AWS"
         Uri: !Sub
           arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${postProducts.Arn}/invocations
       MethodResponses:
         - StatusCode: "200"
           ResponseParameters:
             method.response.header.Access-Control-Allow-Origin: true
-          
-  postProductsPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName: !Ref postProducts
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub
-        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/POST/products
-      
-  GetByIDResource: 
-    Type: "AWS::ApiGateway::Resource"
-    Properties:
-      ParentId: !Ref ProductResource
-      PathPart: "{id}"
-      RestApiId: !Ref ApiGateway
 
+  # DELETE /product
   DeleteProductMethod:
     Type: "AWS::ApiGateway::Method"
     Properties:
@@ -230,6 +332,106 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Origin: true
 
+  # GET /carts
+  GetCartMethod: 
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartResource
+      HttpMethod: "GET"
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "GET"
+        Type: "AWS"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${getCarts.Arn}/invocations
+      RequestParameters:
+        method.request.querystring.search: false 
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # GET /carts/{id}/items
+  GetCartItemsMethod: 
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartByIDResource
+      HttpMethod: "GET"
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "GET"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${getCartItems.Arn}/invocations
+      RequestParameters:
+        method.request.querystring.search: false 
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # POST /carts/{id}/items
+  PostCartItemsMethod: 
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartByIDResource
+      HttpMethod: "POST"
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${postCartItem.Arn}/invocations
+      RequestParameters:
+        method.request.querystring.search: false 
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # DELETE /carts/{id}/items/{item-id}
+  DeleteCartItemMethod: 
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ItemsResource
+      HttpMethod: "DELETE"
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "DELETE"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${deleteCartItem.Arn}/invocations
+      RequestParameters:
+        method.request.querystring.search: false 
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Lambda Permissions
+  # Product Lambda Permissions
+  getProductsPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref getProducts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/GET/products
+          
+  postProductsPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref postProducts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/POST/products
+      
   deleteProductsPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
@@ -238,8 +440,45 @@ Resources:
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub
         arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/DELETE/products
-      
-  # Enable CORS
+
+  # Cart Lambda Permissions
+  getCartsPermissions:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref getCarts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/GET/carts
+
+  getCartItemsPermissions:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref getCartItems
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/GET/carts/{id}/items
+
+  postCartItemPermissions:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref postCartItem
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/POST/carts/{id}/items
+
+  deleteCartItemPermissions:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref deleteCartItem
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:638821506583:${ApiGateway}/*/DELETE/carts/{id}/items/{item-id}
+          
+  # Enable CORS for /products
   ProductCORSMethod:
     Type: "AWS::ApiGateway::Method"
     Properties:
@@ -263,12 +502,13 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
-
+  
+  # Enable CORS for /products/{id}
   ProductIdCORSMethod:
     Type: "AWS::ApiGateway::Method"
     Properties:
       RestApiId: !Ref ApiGateway
-      ResourceId: !Ref ProductResource
+      ResourceId: !Ref GetByIDResource
       HttpMethod: "OPTIONS"
       AuthorizationType: "NONE"
       Integration:
@@ -288,6 +528,107 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
 
+  # Enable CORS for /carts
+  CartCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Enable CORS for /carts/{id}
+  CartByIDCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartByIDResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  
+  # Enable CORS for /carts/{id}/items
+  CartItemsCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartItemsResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Enable CORS for /carts/{id}/items/{item-id}
+  ItemCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ItemsResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+      
+  # API Deployment 
   ApiDeployment:
     Type: "AWS::ApiGateway::Deployment"
     Properties:
@@ -297,8 +638,16 @@ Resources:
       - GetProductMethod
       - PostProductMethod
       - DeleteProductMethod
+      - GetCartMethod
+      - GetCartItemsMethod
+      - PostCartItemsMethod
+      - DeleteCartItemMethod
       - ProductCORSMethod
       - ProductIdCORSMethod
+      - CartCORSMethod
+      - CartByIDCORSMethod
+      - CartItemsCORSMethod
+      - ItemCORSMethod
   
   
 
