@@ -150,7 +150,7 @@ Resources:
       Code: 
         S3Bucket: !Ref S3Bucket
         S3Key: cart/get_cart_items.zip
-      Handler: get_carts.lambda_handler
+      Handler: get_cart_items.lambda_handler
       Runtime: python3.11
       Timeout: 10
       VpcConfig: 
@@ -176,7 +176,7 @@ Resources:
       Code: 
         S3Bucket: !Ref S3Bucket
         S3Key: cart/post_cart_items.zip
-      Handler: post_cart_item.lambda_handler
+      Handler: post_cart_items.lambda_handler
       Runtime: python3.11
       Timeout: 10
       VpcConfig: 
