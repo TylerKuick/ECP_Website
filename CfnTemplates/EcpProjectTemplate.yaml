@@ -3,6 +3,10 @@ Parameters:
     Description: Bucket name for e-commerce site bucket
     Type: String
     Default: tyler-ecp-project-test
+  IpAddressForSSH: 
+    Type: String
+    Description: IP Address allowed for SSH 
+    Default: 122.11.212.0/32
 
 Resources: 
   EcpProjectVPC:
@@ -13,6 +17,8 @@ Resources:
       Tags:
       - Key: "Name"
         Value: "EcpProjectVPC" 
+      - Key: "Project"
+        Value: "ECP"
 
   PublicSubnet1:
     Type: "AWS::EC2::Subnet"
@@ -23,6 +29,9 @@ Resources:
           Ref: 'AWS::Region'
       VpcId: !Ref "EcpProjectVPC"
       CidrBlock: "10.0.0.0/24"
+      Tags:
+      - Key: "Project"
+        Value: "ECP"
 
   PublicSubnet2:
     Type: "AWS::EC2::Subnet"
@@ -33,14 +42,24 @@ Resources:
           Ref: 'AWS::Region'
       VpcId: !Ref "EcpProjectVPC"
       CidrBlock: "10.0.1.0/24"
+      Tags:
+      - Key: "Project"
+        Value: "ECP"
 
   PublicRouteTable:
     Type: "AWS::EC2::RouteTable"
     Properties:
       VpcId: !Ref "EcpProjectVPC"
+      Tags:
+      - Key: "Project"
+        Value: "ECP"
 
   InternetGateway:
     Type: "AWS::EC2::InternetGateway"
+    Properties: 
+      Tags:
+        - Key: "Project"
+          Value: "ECP"
 
   AttachGateway:
     Type: "AWS::EC2::VPCGatewayAttachment"
@@ -72,24 +91,36 @@ Resources:
     DependsOn: AttachGateway
     Properties:
       Domain: vpc
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt NatGatewayEIP1.AllocationId
       SubnetId: !Ref "PublicSubnet1"
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   NatGatewayEIP2:
     Type: AWS::EC2::EIP
     DependsOn: AttachGateway
     Properties:
       Domain: vpc
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   NatGateway2:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt NatGatewayEIP2.AllocationId
       SubnetId: !Ref "PublicSubnet2"
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   PrivateSubnet1: 
      Type: "AWS::EC2::Subnet"
@@ -100,6 +131,9 @@ Resources:
           Ref: 'AWS::Region'
       VpcId: !Ref "EcpProjectVPC"
       CidrBlock: "10.0.2.0/24"
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
   
   PrivateSubnet2: 
      Type: "AWS::EC2::Subnet"
@@ -110,6 +144,9 @@ Resources:
           Ref: 'AWS::Region'
       VpcId: !Ref "EcpProjectVPC"
       CidrBlock: "10.0.3.0/24"
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   DBSubnet1: 
      Type: "AWS::EC2::Subnet"
@@ -120,6 +157,9 @@ Resources:
           Ref: 'AWS::Region'
       VpcId: !Ref "EcpProjectVPC"
       CidrBlock: "10.0.4.0/24"
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
   
   DBSubnet2: 
      Type: "AWS::EC2::Subnet"
@@ -130,11 +170,17 @@ Resources:
           Ref: 'AWS::Region'
       VpcId: !Ref "EcpProjectVPC"
       CidrBlock: "10.0.5.0/24"
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   PrivateRouteTable:
     Type: "AWS::EC2::RouteTable"
     Properties:
       VpcId: !Ref "EcpProjectVPC"
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   PrivateRoute:
     Type: "AWS::EC2::Route"
@@ -164,6 +210,9 @@ Resources:
       SubnetIds: 
          - !Ref "DBSubnet1"  
          - !Ref "DBSubnet2"
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   MyDBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -175,6 +224,9 @@ Resources:
         FromPort: 3306
         ToPort: 3306
         SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   MyRDSInstance:
     Type: AWS::RDS::DBInstance
@@ -187,9 +239,11 @@ Resources:
       MasterUserPassword: password
       VPCSecurityGroups:
         - !Ref MyDBSecurityGroup
-      AvailabilityZone: us-east-1a  
       DBSubnetGroupName: !Ref DBSubnetGroup
-      MultiAZ: false
+      MultiAZ: true
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   S3Bucket:
     Type: "AWS::S3::Bucket"
@@ -199,6 +253,9 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
 
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -215,18 +272,95 @@ Resources:
       - IpProtocol: tcp
         FromPort: 22
         ToPort: 22
-        CidrIp: 0.0.0.0/0
+        CidrIp: !Ref IpAddressForSSH
       - IpProtocol: tcp
         FromPort: 3306
         ToPort: 3306
         CidrIp: 0.0.0.0/0
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
+  
+  # IAM Role for EC2 Instances
+  EC2Role: 
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: EC2Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies: 
+        - PolicyName: EC2RolePolicy
+          PolicyDocument: 
+            Version: 2012-10-17
+            Statement: 
+              - Effect: Allow
+                Action: 
+                  - "autoscaling:DescribeAutoScalingInstances"
+                  - "elasticloadbalancing:RegisterTargets"
+                  - "s3:CreateBucket"
+                  - "s3:ListBucket"
+                  - "s3:GetBucketPolicy"
+                  - "autoscaling:DescribeAutoScalingGroups"
+                  - "rds:CreateDBInstance"
+                  - "rds:DescribeDBInstances"
+                  - "s3:GetObjectTagging"
+                  - "rds:ModifyDBInstance"
+                  - "rds:DescribeDBParameters"
+                  - "s3:DeleteObject"
+                  - "s3:DeleteBucket"
+                  - "rds:DeleteDBInstance"
+                  - "s3:GetBucketWebsite"
+                  - "s3:GetObjectAttributes"
+                  - "elasticloadbalancing:DeregisterTargets"
+                  - "rds:DescribeDBSecurityGroups"
+                  - "s3:PutBucketCORS"
+                  - "rds:StartDBInstance"
+                  - "s3:PutObject"
+                  - "s3:GetObject"
+                  - "rds:DeleteDBSubnetGroup"
+                  - "s3:ListAllMyBuckets"
+                  - "s3:PutBucketWebsite"
+                  - "rds:RebootDBInstance"
+                  - "rds:DeleteDBSecurityGroup"
+                  - "elasticloadbalancing:DescribeTargetHealth"
+                  - "s3:GetBucketCORS"
+                  - "s3:PutAccessGrantsInstanceResourcePolicy"
+                  - "s3:GetBucketLocation"
+                  - "rds:ModifyDBSubnetGroup"
+                Resource: "*"
+              - Effect: Allow
+                Action: 
+                  - "kms:Decrypt"
+                  - "kms:GenerateDataKey"
+                  - "kms:DescribeKey"
+                  -  "kms:CreateGrant"
+                Resource: "*"
+              - Effect: Allow
+                Action: 
+                  - "secretsmanager:CreateSecret"
+                  - "secretsmanager:RotateSecret"
+                  - "secretsmanager:TagResource"
+                Resource: "*"
+  
+  EC2InstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties: 
+      InstanceProfileName: EC2InstanceProfile
+      Path: "/"
+      Roles: 
+        - !Ref EC2Role           
 
   SetupLambdaRDSEC2Instance: 
     Type: "AWS::EC2::Instance"
     Properties: 
       ImageId: ami-04823729c75214919
       InstanceType: t2.micro
-      IamInstanceProfile: LabInstanceProfile
+      IamInstanceProfile: EC2InstanceProfile
       NetworkInterfaces:
         - DeviceIndex: 0
           AssociatePublicIpAddress: true
@@ -261,17 +395,24 @@ Resources:
       Tags: 
         - Key: Name
           Value: Setup Instance
+        - Key: Project
+          Value: ECP
         
   WebServerLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     DeletionPolicy: Delete
     Properties:
       LaunchTemplateName: web-server-launchtemp
+      TagSpecifications:
+        - ResourceType: "launch-template"
+          Tags: 
+          - Key: "Project"
+            Value: "ECP"
       LaunchTemplateData:
         ImageId: ami-04823729c75214919
         InstanceType: t2.micro
         IamInstanceProfile:
-          Arn: arn:aws:iam::638821506583:instance-profile/LabInstanceProfile
+          Arn: !Sub arn:aws:iam::${AWS::AccountId}:instance-profile/EC2InstanceProfile
         KeyName: vockey
         NetworkInterfaces: 
           - DeviceIndex: 0
@@ -299,21 +440,22 @@ Resources:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16.0.0
             git clone https://github.com/TylerKuick/ECP_Website
-
-            #Set Backend API URL to API Gateway
-            #export API_ID=$(aws apigateway get-rest-apis --query "items[0].id" --region us-east-1 --output text)
-            #export API_URL="https://$API_ID.execute-api.us-east-1.amazonaws.com/dev"
-            #echo "'$API_URL'" | sudo tee -a .env
             
             #Build and copy files to Apache Server files
             cd ./ECP_Website/front-end
+
+            #Set Backend API URL to API Gateway
+            export API_ID=$(aws apigateway get-rest-apis --query "items[0].id" --region us-east-1 --output text)
+            export API_URL="https://$API_ID.execute-api.us-east-1.amazonaws.com/dev"
+            echo "VITE_API_BASE_URL='$API_URL'" | sudo tee -a .env
+            echo "VITE_API_BASE_URL='$API_URL'"
+
             sudo chmod +x node_modules/.bin/vite
             npm i
             #npm run build 
             sudo cp -r dist/* /var/www/html
             sudo systemctl restart httpd
-      
-          
+    
   WebTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -327,6 +469,8 @@ Resources:
       Tags:
         - Key: Name
           Value: WebTG
+        - Key: Project
+          Value: ECP
 
   WebASG:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -344,6 +488,10 @@ Resources:
         - !Ref PublicSubnet2
       TargetGroupARNs: 
         - !Ref WebTargetGroup
+      Tags: 
+      - Key: "Project"
+        Value: "ECP"
+        PropagateAtLaunch: true
 
   WebScalingPolicy:
     Type: 'AWS::AutoScaling::ScalingPolicy'
@@ -371,6 +519,8 @@ Resources:
       Tags:
         - Key: Name
           Value: WebALB
+        - Key: "Project"
+          Value: "ECP"
 
   WebALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -382,136 +532,758 @@ Resources:
           TargetGroupArn: !Ref WebTargetGroup
       LoadBalancerArn: !Ref WebALB
 
-  # AppServerSecurityGroup:
-  #   Type: AWS::EC2::SecurityGroup
-  #   DeletionPolicy: Delete
-  #   Properties:
-  #     GroupName: app-server-sg
-  #     GroupDescription: Allow SSH, HTTP, and Port 3001 Access
-  #     VpcId: !Ref EcpProjectVPC
-  #     SecurityGroupIngress:
-  #     - IpProtocol: tcp
-  #       FromPort: 80
-  #       ToPort: 80
-  #       SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
-  #     - IpProtocol: tcp
-  #       FromPort: 3001
-  #       ToPort: 3001
-  #       CidrIp: 0.0.0.0/0
-  #     - IpProtocol: tcp
-  #       FromPort: 22
-  #       ToPort: 22
-  #       SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
+  #IAM Role for Lambda
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies: 
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument: 
+            Version: 2012-10-17
+            Statement: 
+              - Effect: Allow
+                Action: "lambda:InvokeFunction"
+                Resource: 
+                  - "arn:aws:lambda:us-east-1:160885274449:function:getProducts"
+                  - "arn:aws:lambda:us-east-1:160885274449:function:getCartItems"
+                  - "arn:aws:lambda:us-east-1:160885274449:function:deleteCartItem"
+                  - "arn:aws:lambda:us-east-1:160885274449:function:postCartItem"
+                  - "arn:aws:lambda:us-east-1:160885274449:function:postProducts"
+                  - "arn:aws:lambda:us-east-1:160885274449:function:deleteProduct"
+                  - "arn:aws:lambda:us-east-1:160885274449:function:getCarts"
+              - Effect: Allow
+                Action: 
+                  - "rds:DescribeDBInstances"
+                  - "rds:DescribeDBClusters"
+                  - "rds:ModifyDBInstance"
+                  - "rds:AddTagsToResource"
+                  - "rds:CreateTenantDatabase"
+                Resource: "*"
+              - Effect: Allow
+                Action: 
+                  - "s3:GetObject"
+                  - "s3:PutObject"
+                  - "s3:DeleteObject"
+                  - "s3:ListBucket"
+                Resource: 
+                  - "arn:aws:s3:::tyler-ecp-project-test"
+                  - "arn:aws:s3:::tyler-ecp-project-test/*"
+              - Effect: Allow
+                Action: 
+                  - "ec2:DescribeNetworkInterfaces"
+                  - "ec2:CreateNetworkInterface"
+                  - "ec2:DeleteNetworkInterface"
+                  - "ec2:DescribeSubnets"
+                  - "ec2:DescribeSecurityGroups"
+                  - "ec2:DescribeVpcs"
+                Resource: "*"
+              - Effect: Allow
+                Action: 
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              - Effect: Allow
+                Action: 
+                  - "kms:Decrypt"
+                  - "kms:GenerateDataKey"
+                  - "kms:DescribeKey"
+                  -  "kms:CreateGrant"
+                Resource: "*"
+              - Effect: Allow
+                Action: 
+                  - "secretsmanager:CreateSecret"
+                  - "secretsmanager:RotateSecret"
+                  - "secretsmanager:TagResource"
+                Resource: "*"
+              - Effect: Allow
+                Action: 
+                  - "iam:PassRole"
+                Resource: "*"
+              
+  #Lambda Function Definitions
+  getProducts:
+    Type: AWS::Lambda::Function
+    DependsOn: MyRDSInstance
+    Properties:
+      Description: Lambda function to get all products from RDS
+      FunctionName: getProducts
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: product/get_products.zip
+      Handler: get_products.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - !Ref WebServerSecurityGroup
+        SubnetIds: 
+        - !Ref PublicSubnet1 
+        - !Ref PublicSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref DBSubnet1
+        - !Ref DBSubnet2
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt MyRDSInstance.Endpoint.Address
 
-  # AppServerLaunchTemplate:
-  #   Type: AWS::EC2::LaunchTemplate
-  #   DeletionPolicy: Delete
-  #   Properties:
-  #     LaunchTemplateName: app-server-launchtemp
-  #     LaunchTemplateData:
-  #       ImageId: ami-04823729c75214919
-  #       InstanceType: t2.micro
-  #       IamInstanceProfile:
-  #         Arn: arn:aws:iam::767397761895:instance-profile/LabInstanceProfile
-  #       KeyName: vockey
-  #       NetworkInterfaces: 
-  #         - DeviceIndex: 0
-  #           AssociatePublicIpAddress: false
-  #           Groups:
-  #             - !Ref AppServerSecurityGroup
-  #       UserData: 
-  #         Fn::Base64: !Sub |
-  #           #!/bin/bash
-  #           sudo yum update -y
-  #           sudo amazon-linux-extras install epel -y
-  #           sudo yum install stress -y
-  #           sudo yum install -y git
-  #           sudo yum install -y curl
-  #           sudo yum install mariadb -y
-  #           mysql --version
-  #           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-  #           export NVM_DIR="$HOME/.nvm"
-  #           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  #           nvm install 16.0.0
-  #           sudo git clone https://github.com/TylerKuick/ECP_Website
-            
-  #           cd ./ECP_Website/back-end
-            
-  #           export DBHOST=$(aws rds describe-db-instances --db-instance-identifier ecp-rds --query 'DBInstances[0].Endpoint.Address' --region us-east-1 --output text)
-  #           mysql --defaults-file=/ECP_Website/back-end/.my.cnf -u admin -h "$DBHOST" -e "CREATE DATABASE ecp_dev;"
-  #           echo "'$DBHOST'" | sudo tee -a .env
+  postProducts:
+    Type: AWS::Lambda::Function
+    DependsOn: MyRDSInstance
+    Properties:
+      Description: Lambda function to post products to RDS
+      FunctionName: postProducts
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: product/post_products.zip
+      Handler: post_products.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - !Ref WebServerSecurityGroup
+        SubnetIds: 
+        - !Ref PublicSubnet1 
+        - !Ref PublicSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref DBSubnet1
+        - !Ref DBSubnet2
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt MyRDSInstance.Endpoint.Address
 
-  #           sudo chmod +x node_modules/.bin/nodemon
-  #           npm i 
-  #           npm install pm2 -g
-  #           pm2 start index.js
+  deleteProducts:
+    Type: AWS::Lambda::Function
+    DependsOn: MyRDSInstance
+    Properties:
+      Description: Lambda function to delete products in RDS
+      FunctionName: deleteProduct
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: product/delete_product.zip
+      Handler: delete_product.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - !Ref WebServerSecurityGroup
+        SubnetIds: 
+        - !Ref PublicSubnet1 
+        - !Ref PublicSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref DBSubnet1
+        - !Ref DBSubnet2
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt MyRDSInstance.Endpoint.Address
 
-  # AppASG:
-  #   Type: AWS::AutoScaling::AutoScalingGroup
-  #   DeletionPolicy: Delete
-  #   Properties:
-  #     MinSize: '2'
-  #     MaxSize: '2'
-  #     DesiredCapacity: '2'
-  #     LaunchTemplate:
-  #       LaunchTemplateId: !Ref AppServerLaunchTemplate
-  #       Version: !GetAtt AppServerLaunchTemplate.LatestVersionNumber
-  #     HealthCheckType: ELB
-  #     VPCZoneIdentifier:
-  #       - !Ref PrivateSubnet1
-  #       - !Ref PrivateSubnet2
-  #     TargetGroupARNs: 
-  #       - !Ref AppTargetGroup
+  # Cart Lambda Function
+  getCarts:
+    Type: AWS::Lambda::Function
+    DependsOn: MyRDSInstance
+    Properties:
+      Description: Lambda function to get cart objects in RDS
+      FunctionName: getCarts
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: cart/get_carts.zip
+      Handler: get_carts.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - !Ref WebServerSecurityGroup
+        SubnetIds: 
+        - !Ref PublicSubnet1 
+        - !Ref PublicSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref DBSubnet1
+        - !Ref DBSubnet2
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt MyRDSInstance.Endpoint.Address
 
-  # AppScalingPolicy:
-  #   Type: 'AWS::AutoScaling::ScalingPolicy'
-  #   Properties:
-  #     PolicyType: TargetTrackingScaling
-  #     AdjustmentType: ChangeInCapacity
-  #     AutoScalingGroupName: !Ref AppASG
-  #     TargetTrackingConfiguration: 
-  #       PredefinedMetricSpecification: 
-  #         PredefinedMetricType: ASGAverageCPUUtilization
-  #       TargetValue: 20
+  getCartItems:
+    Type: AWS::Lambda::Function
+    DependsOn: MyRDSInstance
+    Properties:
+      Description: Lambda function to get cart items from cart in RDS
+      FunctionName: getCartItems
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: cart/get_cart_items.zip
+      Handler: get_cart_items.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - !Ref WebServerSecurityGroup
+        SubnetIds: 
+        - !Ref PublicSubnet1 
+        - !Ref PublicSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref DBSubnet1
+        - !Ref DBSubnet2
+      Environment:
+        Variables:
+          DB_HOST:  !GetAtt MyRDSInstance.Endpoint.Address
 
-  # AppTargetGroup:
-  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
-  #   Properties:
-  #     VpcId: !Ref EcpProjectVPC
-  #     TargetType: instance
-  #     HealthCheckPath: /
-  #     HealthCheckTimeoutSeconds: 110
-  #     HealthCheckIntervalSeconds: 120
-  #     Port: 3001
-  #     Protocol: HTTP
-  #     Tags:
-  #       - Key: Name
-  #         Value: AppTG
+  postCartItem:
+    Type: AWS::Lambda::Function
+    DependsOn: MyRDSInstance
+    Properties:
+      Description: Lambda function to add cart items into RDS
+      FunctionName: postCartItem
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: cart/post_cart_items.zip
+      Handler: post_cart_items.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - !Ref WebServerSecurityGroup
+        SubnetIds: 
+        - !Ref PublicSubnet1 
+        - !Ref PublicSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref DBSubnet1
+        - !Ref DBSubnet2
+      Environment:
+        Variables:
+          DB_HOST:  !GetAtt MyRDSInstance.Endpoint.Address
+  
+  deleteCartItem:
+    Type: AWS::Lambda::Function
+    DependsOn: MyRDSInstance
+    Properties:
+      Description: Lambda function to delete cart items from RDS
+      FunctionName: deleteCartItem
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref S3Bucket
+        S3Key: cart/delete_cart_item.zip
+      Handler: delete_cart_item.lambda_handler
+      Runtime: python3.11
+      Timeout: 10
+      VpcConfig: 
+        SecurityGroupIds: 
+        - !Ref WebServerSecurityGroup
+        SubnetIds: 
+        - !Ref PublicSubnet1 
+        - !Ref PublicSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref DBSubnet1
+        - !Ref DBSubnet2
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt MyRDSInstance.Endpoint.Address
 
-  # AppALB:
-  #   Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+  # IAM Role for API Gateway Execution
+  # APIGatewayExecutionRole:
+  #   Type: AWS::IAM::Role
   #   Properties:
-  #     Type: application
-  #     Scheme: internal
-  #     Name: AppALB
-  #     SecurityGroups:
-  #     - !Ref AppServerSecurityGroup
-  #     Subnets: 
-  #     - !Ref PrivateSubnet1
-  #     - !Ref PrivateSubnet2
-  #     Tags:
-  #       - Key: Name
-  #         Value: AppALB
+  #     RoleName: APIGatewayExecutionRole
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: apigateway.amazonaws.com
+  #           Action: "sts:AssumeRole"
+  #     Policies: 
+  #       - PolicyName: APIGatewayExecutionPolicy
+  #         PolicyDocument: 
+  #           Version: 2012-10-17
+  #           Statement: 
+  #             - Effect: Allow
+  #               Action: "lambda:InvokeFunction"
+  #               Resource: 
+  #                 - "arn:aws:lambda:us-east-1:160885274449:function:getProducts"
+  #                 - "arn:aws:lambda:us-east-1:160885274449:function:getCartItems"
+  #                 - "arn:aws:lambda:us-east-1:160885274449:function:deleteCartItem"
+  #                 - "arn:aws:lambda:us-east-1:160885274449:function:postCartItem"
+  #                 - "arn:aws:lambda:us-east-1:160885274449:function:postProducts"
+  #                 - "arn:aws:lambda:us-east-1:160885274449:function:deleteProduct"
+  #                 - "arn:aws:lambda:us-east-1:160885274449:function:getCarts"
+  #                 - "*"
 
-  # AppALBListener:
-  #   Type: AWS::ElasticLoadBalancingV2::Listener
-  #   Properties:
-  #     Protocol: HTTP
-  #     Port: 80
-  #     DefaultActions:
-  #       - Type: forward
-  #         TargetGroupArn: !Ref AppTargetGroup
-  #     LoadBalancerArn: !Ref AppALB
+  # API Gateway 
+  ApiGateway: 
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "ECP-Backend-API"
+      Description: "Backend for ShopEasy Site"
+
+  # Resource Paths
+  # /products
+  ProductResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: "products"
+      RestApiId: !Ref ApiGateway
+  
+  # /products/{id}
+  GetByIDResource: 
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !Ref ProductResource
+      PathPart: "{id}"
+      RestApiId: !Ref ApiGateway
+
+  # /carts
+  CartResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: "carts"
+      RestApiId: !Ref ApiGateway
+  
+  # /carts/{id}
+  CartByIDResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !Ref CartResource
+      PathPart: "{id}"
+      RestApiId: !Ref ApiGateway
+  
+  # /carts/{id}/items
+  CartItemsResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !Ref CartByIDResource
+      PathPart: "items"
+      RestApiId: !Ref ApiGateway
+
+  # /carts/{id}/items/{item-id}
+  ItemsResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !Ref CartItemsResource
+      PathPart: "{item-id}"
+      RestApiId: !Ref ApiGateway
+
+  # Methods
+  # GET /product 
+  GetProductMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ProductResource
+      HttpMethod: "GET"
+      AuthorizationType: "NONE"
+      Integration:
+        # Credentials: !GetAtt APIGatewayExecutionRole.Arn
+        IntegrationHttpMethod: "GET"
+        Type: "AWS"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${getProducts.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+        IntegrationResponses:
+          - StatusCode: "200"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # POST /product
+  PostProductMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ProductResource
+      HttpMethod: "POST"
+      AuthorizationType: "NONE"
+      Integration:
+        # # Credentials: !GetAtt APIGatewayExecutionRole.Arn
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${postProducts.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+        IntegrationResponses:
+          - StatusCode: "200"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # DELETE /product
+  DeleteProductMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref GetByIDResource
+      HttpMethod: "DELETE"
+      AuthorizationType: "NONE"
+      Integration:
+        # Credentials: !GetAtt APIGatewayExecutionRole.Arn
+        IntegrationHttpMethod: "DELETE"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${deleteProducts.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+      RequestParameters:
+        method.request.path.id: true
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # GET /carts
+  GetCartMethod: 
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartResource
+      HttpMethod: "GET"
+      AuthorizationType: "NONE"
+      Integration:
+        # Credentials: !GetAtt APIGatewayExecutionRole.Arn
+        IntegrationHttpMethod: "GET"
+        Type: "AWS"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${getCarts.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+        IntegrationResponses:
+          - StatusCode: "200"
+      RequestParameters:
+        method.request.querystring.search: false 
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # GET /carts/{id}/items
+  GetCartItemsMethod: 
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartItemsResource
+      HttpMethod: "GET"
+      AuthorizationType: "NONE"
+      Integration:
+        # Credentials: !GetAtt APIGatewayExecutionRole.Arn
+        IntegrationHttpMethod: "GET"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${getCartItems.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+      RequestParameters:
+        method.request.querystring.search: false 
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # POST /carts/{id}/items
+  PostCartItemsMethod: 
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartItemsResource
+      HttpMethod: "POST"
+      AuthorizationType: "NONE"
+      Integration:
+        # Credentials: !GetAtt APIGatewayExecutionRole.Arn
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${postCartItem.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+      RequestParameters:
+        method.request.querystring.search: false 
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # DELETE /carts/{id}/items/{item-id}
+  DeleteCartItemMethod: 
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ItemsResource
+      HttpMethod: "DELETE"
+      AuthorizationType: "NONE"
+      Integration:
+        # Credentials: !GetAtt APIGatewayExecutionRole.Arn
+        IntegrationHttpMethod: "DELETE"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${deleteCartItem.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+      RequestParameters:
+        method.request.querystring.search: false 
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Lambda Permissions
+  # Product Lambda Permissions
+  getProductsPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref getProducts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub arn:aws:execute-api:us-east-1:${AWS::AccountId}:${ApiGateway}/*/GET/products
+          
+  postProductsPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref postProducts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:${AWS::AccountId}:${ApiGateway}/*/POST/products
+      
+  deleteProductsPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref deleteProducts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:${AWS::AccountId}:${ApiGateway}/*/DELETE/products
+
+  # Cart Lambda Permissions
+  getCartsPermissions:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref getCarts
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:${AWS::AccountId}:${ApiGateway}/*/GET/carts
+
+  getCartItemsPermissions:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref getCartItems
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:${AWS::AccountId}:${ApiGateway}/*/GET/carts/{id}/items
+
+  postCartItemPermissions:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref postCartItem
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:${AWS::AccountId}:${ApiGateway}/*/POST/carts/{id}/items
+
+  deleteCartItemPermissions:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref deleteCartItem
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub
+        arn:aws:execute-api:us-east-1:${AWS::AccountId}:${ApiGateway}/*/DELETE/carts/{id}/items/{item-id}
+          
+  # Enable CORS for /products
+  ProductCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ProductResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  
+  # Enable CORS for /products/{id}
+  ProductIdCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref GetByIDResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Enable CORS for /carts
+  CartCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Enable CORS for /carts/{id}
+  CartByIDCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartByIDResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  
+  # Enable CORS for /carts/{id}/items
+  CartItemsCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref CartItemsResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Enable CORS for /carts/{id}/items/{item-id}
+  ItemCORSMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ItemsResource
+      HttpMethod: "OPTIONS"
+      AuthorizationType: "NONE"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+      
+  # API Deployment 
+  ApiDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    Properties:
+      RestApiId: !Ref ApiGateway
+      StageName: "dev"
+    DependsOn: 
+      - GetProductMethod
+      - PostProductMethod
+      - DeleteProductMethod
+      - GetCartMethod
+      - GetCartItemsMethod
+      - PostCartItemsMethod
+      - DeleteCartItemMethod
+      - ProductCORSMethod
+      - ProductIdCORSMethod
+      - CartCORSMethod
+      - CartByIDCORSMethod
+      - CartItemsCORSMethod
+      - ItemCORSMethod
 
 Outputs: 
   S3Bucket: 
@@ -559,3 +1331,6 @@ Outputs:
     Value: !GetAtt MyRDSInstance.Endpoint.Address
     Export: 
       Name: !Sub "${AWS::StackName}-RDSEndpoint"
+  # apiURL:
+  #   Description: URL for API Gateway 
+  #   Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev"

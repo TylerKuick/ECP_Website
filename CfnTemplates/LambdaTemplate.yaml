@@ -62,32 +62,6 @@ Resources:
       Environment:
         Variables:
           DB_HOST: {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectStackName}-RDSEndpoint"}}
-  # putProducts:
-  #   Type: AWS::Lambda::Function
-  #   Properties:
-  #     Description: Lambda function to update products in RDS
-  #     FunctionName: putProduct
-  #     Role: arn:aws:iam::638821506583:role/LabRole
-  #     Code: 
-  #       S3Bucket: !Ref S3Bucket
-  #       S3Key: product/put_product.zip
-  #     Handler: put_product.lambda_handler
-  #     Runtime: python3.11
-  #     Timeout: 10
-  #     VpcConfig: 
-  #       SecurityGroupIds: 
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-WebServerSecurityGroup"
-  #       SubnetIds: 
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet1"
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PublicSubnet2" 
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet1"
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-PrivateSubnet2"
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet1"
-  #       - Fn::ImportValue: !Sub "${ProjectStackName}-DBSubnet2"
-  #     Environment:
-  #       Variables:
-  #         DB_HOST: Fn::ImportValue: 
-#             !Sub "${ProjectStackName}-RDSEndpoint"
   deleteProducts:
     Type: AWS::Lambda::Function
     Properties:
