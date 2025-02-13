@@ -78,11 +78,13 @@ function Products() {
                 <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     Products
                 </Typography>
+                
                 <Button variant="contained" color="primary">
                     <Link to="/newProduct" className="link">
                         Add Product
                     </Link>
                 </Button>
+            
             </Box>
 
             {/* Search Bar */}

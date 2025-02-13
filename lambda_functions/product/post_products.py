@@ -4,12 +4,14 @@ import boto3
 import os
 
 def lambda_handler(event, context):
-    
     endpoint = os.environ['DB_HOST']
     username = "admin" 
     password = "password" 
     database_name = "ecp_dev" 
     result = ""
+
+    sns = boto3.client('sns')
+    SNS_TOPIC_ARN = os.environ['SNS_TOPIC_ARN']
     try: 
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
     except Exception as e: 
@@ -27,6 +29,15 @@ def lambda_handler(event, context):
         result = "Post Success"
         cursor.close()
         connection.close()
+
+        # Send SNS Notification for new product being added
+        message = f"""
+        New product has been added! 
+        Product Name: {event['prod_name']}
+        Price: {event['prod_price']}
+        """
+        sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message)
+        
         return {
             'statusCode': 201,
             'body': json.dumps(f"{result}")

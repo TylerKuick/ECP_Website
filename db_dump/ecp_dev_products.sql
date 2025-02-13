@@ -1,13 +1,13 @@
--- MySQL dump 10.13  Distrib 8.0.33, for Win64 (x86_64)
+-- MySQL dump 10.14  Distrib 5.5.68-MariaDB, for Linux (x86_64)
 --
--- Host: localhost    Database: ecp_dev
+-- Host: ecp-rds.cte8y4ma40zb.us-east-1.rds.amazonaws.com    Database: ecp_dev
 -- ------------------------------------------------------
--- Server version	8.0.33
+-- Server version	8.0.40
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `products`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `products` (
   `id` int NOT NULL AUTO_INCREMENT,
   `prod_name` varchar(255) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE `products` (
   `updatedAt` datetime NOT NULL,
   `imgId` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'Apple',"5.00",'An apple','2024-12-19 15:20:06','2024-12-19 15:20:06',NULL),(2,'Grape',"8.00",'A grape','2024-12-26 18:32:22','2024-12-26 18:32:22',NULL),(3,'Orange',"5.20",'An orange','2024-12-26 18:35:26','2024-12-26 18:35:26',NULL);
+INSERT INTO `products` VALUES (4,'Fitbit Watch','199.99','Fitbit Watch with HR sensor and step tracker','2025-02-13 05:13:41','2025-02-13 05:13:41','1739423615FitbitWatch'),(5,'Samsung S24','1299.99','BNIB Samsung S24 in Blue','2025-02-13 05:16:04','2025-02-13 05:16:04','1739423761SamsungS24'),(6,'Laptop Stand','19.99','Portable laptop stand','2025-02-13 11:28:09','2025-02-13 11:28:09','1739446082LaptopStand'),(7,'Razer DeathAdder Mouse','59.99','Razer mouse','2025-02-13 11:31:33','2025-02-13 11:31:33','1739446289RazerDeathAdderMouse'),(8,'Logitech Headset','299.99','Logitech Headset','2025-02-13 12:08:05','2025-02-13 12:08:05','1739448475LogitechHeadset'),(9,'Xbox Controller','129.99','Controller','2025-02-13 12:15:30','2025-02-13 12:15:30','1739448920XboxController'),(10,'PlayStation Controller','299.99','Controller','2025-02-13 12:17:31','2025-02-13 12:17:31','1739449047PlayStationController');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-02-13  0:37:24
+-- Dump completed on 2025-02-13 16:01:21
