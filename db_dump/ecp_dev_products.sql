@@ -40,7 +40,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'Apple',5.00,'An apple','2024-12-19 15:20:06','2024-12-19 15:20:06',NULL),(2,'Grape',8.00,'A grape','2024-12-26 18:32:22','2024-12-26 18:32:22',NULL),(3,'Orange',5.20,'An orange','2024-12-26 18:35:26','2024-12-26 18:35:26',NULL);
+INSERT INTO `products` VALUES (1,'Apple',"5.00",'An apple','2024-12-19 15:20:06','2024-12-19 15:20:06',NULL),(2,'Grape',"8.00",'A grape','2024-12-26 18:32:22','2024-12-26 18:32:22',NULL),(3,'Orange',"5.20",'An orange','2024-12-26 18:35:26','2024-12-26 18:35:26',NULL);
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
