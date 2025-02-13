@@ -21,17 +21,15 @@ function Cart() {
 
   const getProductList = () => {
     http.get('/products').then((res) => {
-      var json_res = JSON.parse(res.data['body'])
-      setProductList(json_res);
-      console.log(json_res)
+      setProductList(res.data);
+      console.log(res.data)
     });
   };
 
   const getCartId = () => {
     http.get(`/carts?search=${custId}`).then((res) => {
-      var json_res = JSON.parse(res.data['body'])
-      setCartId(json_res[0]?.id || '');
-      console.log(json_res[0]?.id)
+      setCartId(res.data[0]?.id || '');
+      console.log(res.data[0]?.id)
     });
   };
 
@@ -92,14 +90,14 @@ function Cart() {
           return (
             <Grid item xs={12} sm={6} md={4} key={citem.id}>
               <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                {/* {product?.thumbnail && (
+                {product?.imgId && (
                   <CardMedia
                     component="img"
                     height="140"
-                    image={product.thumbnail}
+                    image={`https://tyler-ecp-project-test.s3.us-east-1.amazonaws.com/images/${product.imgId}`}
                     alt={product.prod_name}
                   />
-                )} */}
+                )}
                 <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                     {product?.prod_name || 'Product Name'}

@@ -13,8 +13,7 @@ function Products() {
 
     const getCartID = () => {
         http.get(`/carts?search=${custId}`).then((res) => {
-            var json_res = JSON.parse(res.data['body'])
-            setCartId(json_res[0].id);
+            setCartId(res.data[0]?.id || '');
         })
     }
 
@@ -29,9 +28,7 @@ function Products() {
 
     const getProducts = () => {
         http.get('/products').then((res)=> {
-            var json_res = JSON.parse(res.data['body']);
-            setProductList(json_res);
-            console.log(productList)
+            setProductList(res.data);
         });
     };
 
@@ -49,6 +46,7 @@ function Products() {
     const searchProducts = () => {
         http.get(`/products?search=${search}`).then((res) => {
             setProductList(res.data);
+            console.log(search);
         });
     };
 
@@ -71,7 +69,6 @@ function Products() {
     useEffect(() => {
         getProducts();
         getCartID();
-        console.log(productList)
     }, []);
 
     return (
@@ -110,7 +107,7 @@ function Products() {
             {/* Product Cards */}
             <Grid2 container spacing={3}>
                 {productList.map((product) => (
-                    <Grid2 item xs={12} sm={6} md={4} lg={3} key={product.id}>
+                    <Grid2 item size={{xs: 12, sm: 6, md: 4, lg: 3}} key={product.id}>
                         <Card
                             sx={{
                                 boxShadow: 3,
@@ -118,7 +115,7 @@ function Products() {
                                 overflow: 'hidden',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                height: '100%',
+                                height: '100%'
                             }}
                         >
                             {/* Add an image placeholder if no product image */}
@@ -135,12 +132,12 @@ function Products() {
                                 <Typography variant="body1" sx={{ color: 'text.secondary', mb: 1 }}>
                                     Price: ${product.prod_price}
                                 </Typography>
-                                <Typography
+                                {/* <Typography
                                     variant="body2"
                                     sx={{ color: 'text.secondary', whiteSpace: 'pre-wrap', mb: 2 }}
                                 >
                                     {product.description}
-                                </Typography>
+                                </Typography> */}
                                 <Button
                                     variant="contained"
                                     color="primary"

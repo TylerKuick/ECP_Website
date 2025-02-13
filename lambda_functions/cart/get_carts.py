@@ -17,11 +17,14 @@ def lambda_handler(event, context):
     database_name = "ecp_dev" 
     
     query_params = event.get("queryStringParameters", {})
-    search_query = query_params.get('search')
-    if not search_query: 
+    if not query_params: 
         query = "SELECT * FROM carts"
     else: 
-        query = f"SELECT * FROM carts WHERE CustomerId={search_query}"
+        search_query = query_params.get('search')
+        if search_query == '':
+            query = "SELECT * FROM carts"
+        else: 
+            query = f"SELECT * FROM carts WHERE CustomerId={search_query}"
 
     try: 
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)

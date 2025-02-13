@@ -16,6 +16,16 @@ def lambda_handler(event, context):
     password = "password" 
     database_name = "ecp_dev" 
     
+    query_params = event.get("queryStringParameters", {})
+    if not query_params: 
+        query = "SELECT * FROM products" 
+    else: 
+        search_query = query_params.get('search')
+        if search_query == '':
+            query = "SELECT * FROM products" 
+        else: 
+            query = f"SELECT * FROM products WHERE prod_name LIKE '%{search_query}%'" 
+        
     try: 
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
     except Exception as e: 
@@ -28,7 +38,6 @@ def lambda_handler(event, context):
         connection.ping(reconnect=True)
         cursor = connection.cursor(pymysql.cursors.DictCursor)
         
-        query = "SELECT * FROM products" 
         cursor.execute(query)
         rows = cursor.fetchall()
         
@@ -40,7 +49,7 @@ def lambda_handler(event, context):
     except Exception as e:
         return {
             "statusCode": 500,
-            "body": json.dumps({"error": f"Failed to fetch data: {str(e)}"})
+            "body": json.dumps({"error": f"Failed to fetch data: {query}"})
         }
         
 
