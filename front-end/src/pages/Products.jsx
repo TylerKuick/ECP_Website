@@ -124,7 +124,7 @@ function Products() {
                             {/* Add an image placeholder if no product image */}
                             <CardMedia
                                 component="img"
-                                image={product.image || 'https://via.placeholder.com/150'}
+                                image={`https://tyler-ecp-project-test.s3.us-east-1.amazonaws.com/images/${product.imgId}` || 'https://via.placeholder.com/150'}
                                 alt={product.prod_name}
                                 sx={{ height: 150, objectFit: 'cover' }}
                             />

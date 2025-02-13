@@ -21,8 +21,8 @@ def lambda_handler(event, context):
         connection.ping(reconnect=False)
         cursor = connection.cursor(pymysql.cursors.DictCursor)
         
-        query = "INSERT INTO products (prod_name, prod_price, description, createdAt, updatedAt) VALUES(%s, %s, %s,now(),now())" 
-        cursor.execute(query, (event['prod_name'], event['prod_price'],event['description']))
+        query = "INSERT INTO products (prod_name, prod_price, description, imgId, createdAt, updatedAt) VALUES(%s, %s, %s, %s, now(),now())" 
+        cursor.execute(query, (event['prod_name'], event['prod_price'],event['description'], event['imgId']))
         connection.commit()
         result = "Post Success"
         cursor.close()

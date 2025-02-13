@@ -332,6 +332,7 @@ Resources:
                   - "s3:PutAccessGrantsInstanceResourcePolicy"
                   - "s3:GetBucketLocation"
                   - "rds:ModifyDBSubnetGroup"
+                  - "apigateway:GET"
                 Resource: "*"
               - Effect: Allow
                 Action: 
@@ -435,24 +436,24 @@ Resources:
             sudo systemctl enable httpd
             sudo yum install -y git
             sudo yum install -y curl
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm install 16.0.0
+            
             git clone https://github.com/TylerKuick/ECP_Website
             
             #Build and copy files to Apache Server files
             cd ./ECP_Website/front-end
-
+            sudo -s 
+            
             #Set Backend API URL to API Gateway
             export API_ID=$(aws apigateway get-rest-apis --query "items[0].id" --region us-east-1 --output text)
             export API_URL="https://$API_ID.execute-api.us-east-1.amazonaws.com/dev"
             echo "VITE_API_BASE_URL='$API_URL'" | sudo tee -a .env
             echo "VITE_API_BASE_URL='$API_URL'"
 
-            sudo chmod +x node_modules/.bin/vite
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install 16.0.0
             npm i
-            #npm run build 
             sudo cp -r dist/* /var/www/html
             sudo systemctl restart httpd
     

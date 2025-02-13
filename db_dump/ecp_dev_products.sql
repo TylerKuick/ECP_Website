@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `ecp_dev` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `ecp_dev`;
 -- MySQL dump 10.13  Distrib 8.0.33, for Win64 (x86_64)
 --
 -- Host: localhost    Database: ecp_dev
@@ -27,10 +25,11 @@ DROP TABLE IF EXISTS `products`;
 CREATE TABLE `products` (
   `id` int NOT NULL AUTO_INCREMENT,
   `prod_name` varchar(255) NOT NULL,
-  `prod_price` varchar(10) NOT NULL,
+  `prod_price` decimal(3,2) NOT NULL,
   `description` text NOT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
+  `imgId` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -41,7 +40,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'Apple',"5.00",'An apple','2024-12-19 15:20:06','2024-12-19 15:20:06'),(2,'Grape',"8.00",'A grape','2024-12-26 18:32:22','2024-12-26 18:32:22'),(3,'Orange',"5.20",'An orange','2024-12-26 18:35:26','2024-12-26 18:35:26');
+INSERT INTO `products` VALUES (1,'Apple',5.00,'An apple','2024-12-19 15:20:06','2024-12-19 15:20:06',NULL),(2,'Grape',8.00,'A grape','2024-12-26 18:32:22','2024-12-26 18:32:22',NULL),(3,'Orange',5.20,'An orange','2024-12-26 18:35:26','2024-12-26 18:35:26',NULL);
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-01-13 12:17:11
+-- Dump completed on 2025-02-13  0:37:24
