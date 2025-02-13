@@ -12,7 +12,7 @@ def lambda_handler(event, context):
     
     s3Params = {
         'Bucket': "tyler-ecp-project-test",
-        'Key': photoKey,
+        'Key': "images/" + photoKey,
         'ContentType': content_type
     }
     response = s3.generate_presigned_url('put_object', Params=s3Params, ExpiresIn=3600)

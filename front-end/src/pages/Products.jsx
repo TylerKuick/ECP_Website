@@ -15,7 +15,6 @@ function Products() {
         http.get(`/carts?search=${custId}`).then((res) => {
             var json_res = JSON.parse(res.data['body'])
             setCartId(json_res[0].id);
-            console.log(json_res[0].id)
         })
     }
 
@@ -72,6 +71,7 @@ function Products() {
     useEffect(() => {
         getProducts();
         getCartID();
+        console.log(productList)
     }, []);
 
     return (

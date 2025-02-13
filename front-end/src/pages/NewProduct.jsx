@@ -89,12 +89,13 @@ function NewProduct() {
             data.prod_price = data.prod_price.trim();
             data.description = data.description.trim();
             data.imgId = `${ts}${data.prod_name.replaceAll(" ", "")}`;
+            console.log(data);
             handleImgUpload(img, data.imgId).then((res) => {
                 console.log(res);
-                // http.post("/products", data).then((res) => {
-                //     console.log(res.data);
-                //     navigate("/products");
-                // });
+                http.post("/products", data).then((res) => {
+                    console.log(res.data);
+                    navigate("/products");
+                });
             });
         }
     });
