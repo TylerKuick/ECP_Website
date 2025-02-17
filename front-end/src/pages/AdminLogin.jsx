@@ -10,7 +10,7 @@ const AdminLogin = ({ setUser }) => {
 
   const handleLogin = () => {
     if (username === "admin" && password === "admin123") {
-      setUser({ role: "admin" });
+      setUser({ role: "admin" }); // Setting the user role as admin
       navigate("/admin");
     } else {
       setError("Invalid credentials");
@@ -53,8 +53,7 @@ const AdminLogin = ({ setUser }) => {
                 },
             }}
           />
-          <Button className="login-button" onClick={handleLogin}  component="label"
-                        variant="contained">
+          <Button className="login-button" onClick={handleLogin} component="label" variant="contained">
             Login
           </Button>
         </CardContent>

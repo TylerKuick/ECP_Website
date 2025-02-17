@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Grid2, Card, CardContent, IconButton, TextField, Button, CardMedia } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { Search, Clear, Delete} from '@mui/icons-material';
+import { Search, Clear, Delete } from '@mui/icons-material';
 import http from '../http';
 
-function Products() {
+function Products({ user }) {
     const [productList, setProductList] = useState([]);
     const custId = 1;
+    const isAdmin = user?.role === 'admin'; // Check if the user is an admin
 
     // Cart Info
     const [cartId, setCartId] = useState('');
@@ -14,8 +15,8 @@ function Products() {
     const getCartID = () => {
         http.get(`/carts?search=${custId}`).then((res) => {
             setCartId(res.data[0]?.id || '');
-        })
-    }
+        });
+    };
 
     const addToCart = (product, qty) => {
         let data = {
@@ -24,21 +25,21 @@ function Products() {
             "total": (product.prod_price * qty),
         };
         http.post(`/carts/${cartId}/items`, data);
-    }
+    };
 
     const getProducts = () => {
-        http.get('/products').then((res)=> {
+        http.get('/products').then((res) => {
             setProductList(res.data);
         });
     };
 
     const deleteProduct = (id) => {
-        http.delete(`/products/${id}`).then(()=> {
+        http.delete(`/products/${id}`).then(() => {
             getProducts();
         });
-    }
+    };
 
-    // Search Products 
+    // Search Products
     const [search, setSearch] = useState('');
     const onSearchChange = (e) => {
         setSearch(e.target.value);
@@ -46,7 +47,6 @@ function Products() {
     const searchProducts = () => {
         http.get(`/products?search=${search}`).then((res) => {
             setProductList(res.data);
-            console.log(search);
         });
     };
 
@@ -78,13 +78,12 @@ function Products() {
                 <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     Products
                 </Typography>
-                
+
                 <Button variant="contained" color="primary">
                     <Link to="/newProduct" className="link">
                         Add Product
                     </Link>
                 </Button>
-            
             </Box>
 
             {/* Search Bar */}
@@ -121,59 +120,58 @@ function Products() {
                                 transition: "transform 0.2s ease-in-out",
                                 "&:hover": { transform: "scale(1.02)" },
                             }}
-            >
-                {/* Product Image */}
-                <CardMedia
-                    component="img"
-                    image={product.imgId 
-                        ? `https://tyler-ecp-project-test.s3.us-east-1.amazonaws.com/images/${product.imgId}`
-                        : 'https://via.placeholder.com/150'}
-                    alt={product.prod_name}
-                    sx={{ height: 180, objectFit: 'cover' }}
-                />
-                
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    {/* Product Name */}
-                    <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold", color: "black" }}>
-                        {product.prod_name}
-                    </Typography>
-                    
-                    {/* Product Price */}
-                    <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
-                        Price: <b>${product.prod_price}</b>
-                    </Typography>
-
-                    {/* Buttons (Add to Cart & Delete for Admins) */}
-                    <Box sx={{ mt: "auto" }}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            onClick={() => addToCart(product, 1)}
-                            sx={{ borderRadius: 2 }}
                         >
-                            Add to Cart
-                        </Button>
+                            {/* Product Image */}
+                            <CardMedia
+                                component="img"
+                                image={product.imgId
+                                    ? `https://tyler-ecp-project-test.s3.us-east-1.amazonaws.com/images/${product.imgId}`
+                                    : 'https://via.placeholder.com/150'}
+                                alt={product.prod_name}
+                                sx={{ height: 180, objectFit: 'cover' }}
+                            />
 
-                        {/* Show delete button only if user is an admin */}
-                        {isAdmin && (
-                            <Button
-                                sx={{ mt: 1, borderRadius: 2 }}
-                                variant="contained"
-                                color="error"
-                                fullWidth
-                                onClick={() => deleteProduct(product.id)}
-                            >
-                                <Delete sx={{ mr: 1 }} /> Delete
-                            </Button>
-                                )}
-                            </Box>
-                        </CardContent>
-                    </Card>
-                </Grid2>
-            ))}
-</Grid2>
+                            <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                                {/* Product Name */}
+                                <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold", color: "black" }}>
+                                    {product.prod_name}
+                                </Typography>
 
+                                {/* Product Price */}
+                                <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
+                                    Price: <b>${product.prod_price}</b>
+                                </Typography>
+
+                                {/* Buttons (Add to Cart & Delete for Admins) */}
+                                <Box sx={{ mt: "auto" }}>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        fullWidth
+                                        onClick={() => addToCart(product, 1)}
+                                        sx={{ borderRadius: 2 }}
+                                    >
+                                        Add to Cart
+                                    </Button>
+
+                                    {/* Show delete button only if user is an admin */}
+                                    {isAdmin && (
+                                        <Button
+                                            sx={{ mt: 1, borderRadius: 2 }}
+                                            variant="contained"
+                                            color="error"
+                                            fullWidth
+                                            onClick={() => deleteProduct(product.id)}
+                                        >
+                                            <Delete sx={{ mr: 1 }} /> Delete
+                                        </Button>
+                                    )}
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    </Grid2>
+                ))}
+            </Grid2>
         </Box>
     );
 }
