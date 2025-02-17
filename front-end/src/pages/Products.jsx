@@ -109,59 +109,71 @@ function Products() {
             {/* Product Cards */}
             <Grid2 container spacing={3}>
                 {productList.map((product) => (
-                    <Grid2 item size={{xs: 12, sm: 6, md: 4, lg: 3}} key={product.id}>
+                    <Grid2 item xs={12} sm={6} md={4} lg={3} key={product.id}>
                         <Card
                             sx={{
-                                boxShadow: 3,
-                                borderRadius: 2,
+                                boxShadow: 4,
+                                borderRadius: 3,
                                 overflow: 'hidden',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                height: '100%'
+                                height: '100%',
+                                transition: "transform 0.2s ease-in-out",
+                                "&:hover": { transform: "scale(1.02)" },
                             }}
+            >
+                {/* Product Image */}
+                <CardMedia
+                    component="img"
+                    image={product.imgId 
+                        ? `https://tyler-ecp-project-test.s3.us-east-1.amazonaws.com/images/${product.imgId}`
+                        : 'https://via.placeholder.com/150'}
+                    alt={product.prod_name}
+                    sx={{ height: 180, objectFit: 'cover' }}
+                />
+                
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                    {/* Product Name */}
+                    <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold", color: "black" }}>
+                        {product.prod_name}
+                    </Typography>
+                    
+                    {/* Product Price */}
+                    <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
+                        Price: <b>${product.prod_price}</b>
+                    </Typography>
+
+                    {/* Buttons (Add to Cart & Delete for Admins) */}
+                    <Box sx={{ mt: "auto" }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            onClick={() => addToCart(product, 1)}
+                            sx={{ borderRadius: 2 }}
                         >
-                            {/* Add an image placeholder if no product image */}
-                            <CardMedia
-                                component="img"
-                                image={`https://tyler-ecp-project-test.s3.us-east-1.amazonaws.com/images/${product.imgId}` || 'https://via.placeholder.com/150'}
-                                alt={product.prod_name}
-                                sx={{ height: 150, objectFit: 'cover' }}
-                            />
-                            <CardContent sx={{ flexGrow: 1 }}>
-                                <Typography variant="h6" sx={{ mb: 1 }}>
-                                    {product.prod_name}
-                                </Typography>
-                                <Typography variant="body1" sx={{ color: 'text.secondary', mb: 1 }}>
-                                    Price: ${product.prod_price}
-                                </Typography>
-                                {/* <Typography
-                                    variant="body2"
-                                    sx={{ color: 'text.secondary', whiteSpace: 'pre-wrap', mb: 2 }}
-                                >
-                                    {product.description}
-                                </Typography> */}
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    fullWidth
-                                    onClick={() => addToCart(product, 1)}
-                                >
-                                    Add to Cart
-                                </Button>
-                                <Button 
-                                    sx={{mt:2}}
-                                    variant="contained"
-                                    color="error" 
-                                    fullWidth
-                                    onClick={() => deleteProduct(product.id)}
-                                >
-                                        <Delete/>
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </Grid2>
-                ))}
-            </Grid2>
+                            Add to Cart
+                        </Button>
+
+                        {/* Show delete button only if user is an admin */}
+                        {isAdmin && (
+                            <Button
+                                sx={{ mt: 1, borderRadius: 2 }}
+                                variant="contained"
+                                color="error"
+                                fullWidth
+                                onClick={() => deleteProduct(product.id)}
+                            >
+                                <Delete sx={{ mr: 1 }} /> Delete
+                            </Button>
+                                )}
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </Grid2>
+            ))}
+</Grid2>
+
         </Box>
     );
 }
