@@ -12,7 +12,7 @@ def lambda_handler(event, context):
 
     path_parameters = event.get("pathParameters")
     product_id = path_parameters.get("id") if path_parameters else None
-
+    body = json.loads(event['body'])
     try: 
         connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
     except Exception as e: 
@@ -25,8 +25,8 @@ def lambda_handler(event, context):
         connection.ping(reconnect=False)
         cursor = connection.cursor()
         
-        query = "UPDATE products SET prod_name=%s prod_price=%s description=%s WHERE ID=%s" 
-        cursor.execute(query, (event['prod_name'], event['prod_price'],event['description'], product_id))
+        query = "UPDATE products SET prod_name=%s, prod_price=%s, description=%s, imgId=%s WHERE ID=%s" 
+        cursor.execute(query, (body['prod_name'], body['prod_price'],body['description'], body['imgId'], product_id))
         connection.commit()
 
         result  = "Updated Successfully"

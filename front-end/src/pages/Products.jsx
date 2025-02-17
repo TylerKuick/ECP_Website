@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Grid2, Card, CardContent, IconButton, TextField, Button, CardMedia } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { Search, Clear, Delete } from '@mui/icons-material';
+import { Search, Clear, Delete, Edit } from '@mui/icons-material';
 import http from '../http';
 
 function Products({ user }) {
     const [productList, setProductList] = useState([]);
     const custId = 1;
-    const isAdmin = user?.role === 'admin'; // Check if the user is an admin
+    const userJson = JSON.parse(localStorage.getItem('user'));
+    const isAdmin = userJson?.role === 'admin'; // Check if the user is an admin
+    const isUser = userJson?.role !== 'admin';
 
     // Cart Info
     const [cartId, setCartId] = useState('');
@@ -30,6 +32,7 @@ function Products({ user }) {
     const getProducts = () => {
         http.get('/products').then((res) => {
             setProductList(res.data);
+            console.log(productList);
         });
     };
 
@@ -38,6 +41,16 @@ function Products({ user }) {
             getProducts();
         });
     };
+
+    const setUpdateDetails = (product) => {
+        http.get(`/products/${product.id}`).then((res)=> {
+            let data = res.data;
+            localStorage.setItem("UpdateItemData", JSON.stringify(data));
+        });
+
+        // let test = JSON.parse(localStorage.getItem("UpdateItemData"));
+        // console.log(test);
+    }
 
     // Search Products
     const [search, setSearch] = useState('');
@@ -70,6 +83,10 @@ function Products({ user }) {
         getProducts();
         getCartID();
     }, [cartId]);
+    
+    useEffect(() => {
+        localStorage.setItem("UpdateItemData", JSON.stringify({}));
+    }, [])
 
     return (
         <Box>
@@ -78,12 +95,14 @@ function Products({ user }) {
                 <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     Products
                 </Typography>
-
-                <Button variant="contained" color="primary">
+                {isAdmin ? (
+                    <Button variant="contained" color="primary">
                     <Link to="/newProduct" className="link">
                         Add Product
                     </Link>
-                </Button>
+                    </Button>) : <></> 
+                }
+                
             </Box>
 
             {/* Search Bar */}
@@ -108,7 +127,7 @@ function Products({ user }) {
             {/* Product Cards */}
             <Grid2 container spacing={3}>
                 {productList.map((product) => (
-                    <Grid2 item xs={12} sm={6} md={4} lg={3} key={product.id}>
+                    <Grid2 item size={{xs:12, sm:6, md:4, lg:3 }}key={product.id}>
                         <Card
                             sx={{
                                 boxShadow: 4,
@@ -144,27 +163,43 @@ function Products({ user }) {
 
                                 {/* Buttons (Add to Cart & Delete for Admins) */}
                                 <Box sx={{ mt: "auto" }}>
-                                    <Button
+                                    {isUser && (
+                                        <Button
                                         variant="contained"
                                         color="primary"
                                         fullWidth
                                         onClick={() => addToCart(product, 1)}
                                         sx={{ borderRadius: 2 }}
-                                    >
-                                        Add to Cart
-                                    </Button>
+                                        >
+                                            Add to Cart
+                                        </Button>
+                                    )}
 
                                     {/* Show delete button only if user is an admin */}
                                     {isAdmin && (
-                                        <Button
-                                            sx={{ mt: 1, borderRadius: 2 }}
-                                            variant="contained"
-                                            color="error"
-                                            fullWidth
-                                            onClick={() => deleteProduct(product.id)}
-                                        >
-                                            <Delete sx={{ mr: 1 }} /> Delete
-                                        </Button>
+                                        <Box>
+                                            <Link to="/updateProduct" className="link">
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    fullWidth
+                                                    onClick={() => setUpdateDetails(product)}
+                                                    sx={{ borderRadius: 2 }}
+                                                    >
+                                                        <Edit sx={{ mr: 1 }}/>Update
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                sx={{ mt: 1, borderRadius: 2 }}
+                                                variant="contained"
+                                                color="error"
+                                                fullWidth
+                                                onClick={() => deleteProduct(product.id)}
+                                            >
+                                                <Delete sx={{ mr: 1 }} /> Delete
+                                            </Button>
+                                        </Box>
+                                        
                                     )}
                                 </Box>
                             </CardContent>

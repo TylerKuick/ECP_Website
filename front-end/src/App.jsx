@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate } f
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import NewProduct from "./pages/NewProduct";
+import UpdateProduct from "./pages/UpdateProduct";
 import Home from "./pages/Home";
 import ChatbotPage from "./pages/ChatbotPage";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -35,6 +36,7 @@ function App() {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+  console.log(user);
 
   return (
     <Router>
@@ -75,10 +77,11 @@ function App() {
       <Container>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
+          <Route path="/products" element={<Products user={setUser}/>} />
           <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/newProduct" element={<NewProduct />} />
+          <Route path="updateProduct" element={<UpdateProduct/>}/>
           <Route path="/user-login" element={<UserLogin setUser={setUser} />} />
           <Route path="/admin-login" element={<AdminLogin setUser={setUser} />} />
           <Route

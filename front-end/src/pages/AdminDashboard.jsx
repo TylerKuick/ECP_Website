@@ -4,7 +4,7 @@ const AdminDashboard = () => {
   return (
     <Container sx={{ mt: 5 }}>
       <Typography variant="h3">Admin Dashboard</Typography>
-      <Typography>Welcome, Admin! Manage your products, users, and settings here.</Typography>
+      <Typography sx={{mt: 2}}>Welcome! You've signed in as an Admin! Navigate to the Product page to manage your products!</Typography>
     </Container>
   );
 };
