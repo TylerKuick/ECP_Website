@@ -12,7 +12,7 @@ import {
 import { styled } from "@mui/system";
 
 const HeroSection = styled(Box)(({ theme }) => ({
-  backgroundImage: 'url("https://source.unsplash.com/1600x400/?shopping,products")',
+  backgroundImage: 'url("https://unsplash.com/photos/assorted-color-clothes-lot-FK81rxilUXg")',
   backgroundSize: "cover",
   backgroundPosition: "center",
   height: "400px",
@@ -57,10 +57,10 @@ function HomePage() {
       {/* Hero Section */}
       <HeroSection>
         <Box>
-          <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2 }}>
+          <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2, color: "black" }}>
             Welcome to ShopEasy!
           </Typography>
-          <Typography variant="h6" sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ mb: 4, color: "black" }}>
             Discover the best deals and products tailored for you.
           </Typography>
           <Button
