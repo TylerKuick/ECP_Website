@@ -69,7 +69,7 @@ function Products({ user }) {
     useEffect(() => {
         getProducts();
         getCartID();
-    }, []);
+    }, [cartId]);
 
     return (
         <Box>

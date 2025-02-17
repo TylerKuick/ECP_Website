@@ -453,7 +453,9 @@ Resources:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16.0.0
+            #export NODE_OPTIONS="--max-old-space-size=8192"
             npm i
+            #npm run build
             sudo cp -r dist/* /var/www/html
             sudo systemctl restart httpd
     

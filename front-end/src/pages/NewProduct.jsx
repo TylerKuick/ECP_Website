@@ -1,4 +1,4 @@
-import { Box, Typography, TextField, Button, Card, CardContent, Container } from '@mui/material';
+import { Box, Typography, TextField, Button, Card, CardContent, Container, Modal } from '@mui/material';
 import { CloudUpload } from "@mui/icons-material";
 import { styled } from '@mui/material/styles';
 import React, { useState, useEffect } from 'react';
@@ -51,6 +51,35 @@ function NewProduct() {
             console.error("Error uploading image", error);
         }
     }
+
+    // Timer Countdown
+    const timeout = (number) => {
+        return new Promise( res => setTimeout(res, number));
+    };
+
+    const [duration, setDuration] = useState(5);
+    const timer = async () => {
+        for (var i=5; i >= 0; i--) {
+            setDuration(i)
+            await timeout(1000)
+        }
+        navigate("/products");
+    }
+    
+    // Modal Resources
+    const [open, setOpen] = React.useState(false);
+    const handleClose = () => setOpen(false);
+    const handleOpen = () => setOpen(true);
+    const style = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        borderRadius:5,
+        bgcolor: 'background.paper',
+        p: 4,
+      };
     
     // Upload Image Button Input Style
     const VisuallyHiddenInput = styled('input')({
@@ -90,11 +119,11 @@ function NewProduct() {
             data.description = data.description.trim();
             data.imgId = `${ts}${data.prod_name.replaceAll(" ", "")}`;
             console.log(data);
+            timer();
             handleImgUpload(img, data.imgId).then((res) => {
                 console.log(res);
                 http.post("/products", data).then((res) => {
                     console.log(res.data);
-                    navigate("/products");
                 });
             });
         }
@@ -202,13 +231,29 @@ function NewProduct() {
                                     backgroundColor: "#4caf50",
                                     "&:hover": {
                                         backgroundColor: "#43a047"
-                                    },
+                                    }
                                 }}
+                                onClick={handleOpen}
                             >
                                 Add Product
                             </Button>
                         </Box>
                     </Box>
+                    <Modal
+                    open={open}
+                    onClose={handleClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                    >
+                        <Box sx={style}>
+                            <Typography id="modal-modal-title" variant="h5" component="h2">
+                            Adding your new product!
+                            </Typography>
+                            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                                You will be redirected to the product page in... {duration}s
+                            </Typography>
+                        </Box>
+                    </Modal>
                 </CardContent>
             </Card>
         </Box>
