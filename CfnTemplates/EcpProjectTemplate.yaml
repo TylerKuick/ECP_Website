@@ -460,6 +460,7 @@ Resources:
             npm i
             #npm run build
             sudo cp -r dist/* /var/www/html
+            sudo cp dist/.htaccess /var/www/html
             sudo systemctl restart httpd
     
   WebTargetGroup:
