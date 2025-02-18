@@ -10,6 +10,7 @@ import {
   CardActions,
 } from "@mui/material";
 import { styled } from "@mui/system";
+import LexChatbot from '../components/Chatbot';
 
 const HeroSection = styled(Box)(({ theme }) => ({
   backgroundImage: 'url("https://unsplash.com/photos/assorted-color-clothes-lot-FK81rxilUXg")',
@@ -199,6 +200,9 @@ function HomePage() {
           © 2025 ShopEasy. All rights reserved. | Contact Us: support@shopeasy.com
         </Typography>
       </Box>
+        <div>
+          <LexChatbot />
+        </div>
     </Box>
   );
 }

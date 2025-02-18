@@ -18,7 +18,7 @@
 }
 
 .chatbot-header {
-  background-color: #4CAF50;
+  background-color:  #007bff;
   color: white;
   padding: 10px;
   display: flex;
@@ -52,14 +52,16 @@
 }
 
 .user-message {
-  background-color: #4CAF50;
+  background-color: #007bff;
   margin-left: auto;
   text-align: right;
+  color: white;
 }
 
 .bot-message {
-  background-color: #4CAF50;
+  background-color:#4169E1;
   text-align: left;
+  color: white;
 }
 
 .chat-input-container {
@@ -80,7 +82,7 @@
 
 .chat-input-container button {
   padding: 8px 16px;
-  background-color: #4CAF50;
+  background-color: #4169E1;
   color: white;
   border: none;
   border-radius: 20px;
@@ -89,5 +91,5 @@
 }
 
 .chat-input-container button:hover {
-  background-color: #45a049;
+  background-color: #4169E1;
 }

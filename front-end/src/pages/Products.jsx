@@ -3,6 +3,7 @@ import { Box, Typography, Grid2, Card, CardContent, IconButton, TextField, Butto
 import { Link } from 'react-router-dom';
 import { Search, Clear, Delete, Edit } from '@mui/icons-material';
 import http from '../http';
+import LexChatbot from '../components/Chatbot';
 
 function Products({ user }) {
     const [productList, setProductList] = useState([]);
@@ -207,6 +208,9 @@ function Products({ user }) {
                     </Grid2>
                 ))}
             </Grid2>
+            <div>
+                <LexChatbot />
+            </div>
         </Box>
     );
 }
