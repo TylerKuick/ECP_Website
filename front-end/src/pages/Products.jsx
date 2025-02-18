@@ -47,6 +47,8 @@ function Products({ user }) {
         http.get(`/products/${product.id}`).then((res)=> {
             let data = res.data;
             localStorage.setItem("UpdateItemData", JSON.stringify(data));
+            window.dispatchEvent(new Event("UpdateItemData"));
+            console.log("localStorage on button click: ", localStorage.getItem("UpdateItemData"));
         });
 
         // let test = JSON.parse(localStorage.getItem("UpdateItemData"));
@@ -87,6 +89,7 @@ function Products({ user }) {
     
     useEffect(() => {
         localStorage.setItem("UpdateItemData", JSON.stringify({}));
+        console.log("localStorage at useEffect: ",localStorage.getItem("UpdateItemData"));
     }, [])
 
     return (
