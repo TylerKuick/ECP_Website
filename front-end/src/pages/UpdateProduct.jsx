@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import http from "../http.js";
 import { Box, Typography, TextField, Button, Card, CardContent, Container, Modal } from '@mui/material';
+import { Refresh } from "@mui/icons-material";
 import { styled } from '@mui/material/styles';
 import * as yup from 'yup';
 import dayjs from 'dayjs';
@@ -9,11 +10,12 @@ import { useNavigate } from 'react-router-dom';
 
 function UpdateProduct() {
     const [imgURL, setImgURL] = useState("");
-    var item = JSON.parse(localStorage.getItem("UpdateItemData"));
+    const [item, setItem] = useState(JSON.parse(localStorage.getItem("UpdateItemData")));
 
     useEffect(() => {
+        setItem(JSON.parse(localStorage.getItem("UpdateItemData")));
         setImgURL(`https://tyler-ecp-project-test.s3.us-east-1.amazonaws.com/images/${item.imgId}`);
-    }, [])
+    }, []);
 
     // Timer Countdown
     const timeout = (number) => {
@@ -77,13 +79,22 @@ function UpdateProduct() {
         }
     });
 
+    const refreshPage = () => {
+        window.location.reload();
+    }
+
   return (
     <Box sx={{ mt: 5, display: 'flex', justifyContent: 'center' }}>
             <Card sx={{ width: '100%', maxWidth: 600, boxShadow: 3, p: 2 }}>
+                <Button sx={{float:'right'}} onClick={()=> {refreshPage()}}>
+                    <Refresh/>
+                </Button>
                 <CardContent>
+                    
                     <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
                         Update Product Information
                     </Typography>
+                    
                     {
                         imgURL ? (
                             <Container sx={{mt:3}}>
