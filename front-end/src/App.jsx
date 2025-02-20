@@ -62,7 +62,7 @@ function App() {
         <Container>
           <Toolbar disableGutters sx={{ justifyContent: "space-between" }}>
             <Link to="/">
-              <Typography variant="h6" component="div">ECP Project</Typography>
+              <Typography variant="h6" component="div">ShopEasy</Typography>
             </Link>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Link to="/"><Typography>Home</Typography></Link>
