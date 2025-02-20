@@ -8,9 +8,15 @@ import {
   IconButton,
   Button,
   CardMedia,
-  Modal
+  Modal,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle
 } from '@mui/material';
-import { Delete } from '@mui/icons-material';
+import { Delete, ShoppingCartCheckout } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import http from '../http';
 
 function Cart() {
@@ -18,81 +24,11 @@ function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [prodList, setProductList] = useState([]);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const navigate = useNavigate();
   const custId = 1;
-
-  const getProductList = () => {
-    http.get('/products').then((res) => {
-      setProductList(res.data);
-      console.log(res.data)
-    });
-  };
-
-  const getCartId = () => {
-    http.get(`/carts?search=${custId}`).then((res) => {
-      setCartId(res.data[0]?.id || '');
-      console.log(res.data[0]?.id)
-    });
-  };
-
-  const getCartItems = () => {
-    if (cartId) {
-      http.get(`/carts/${cartId}/items`).then((res) => {
-        setCartItems(res.data);
-        console.log(res.data)
-      });
-    }
-  };
-
-  const onClickCheckout = () => {
-    const data = {
-      cart_total: total,
-    };
-    console.log(data);
-    // http.post(`/cart/${cartId}/`, data);
-  };
-
-  const onClickClearCart = () => {
-    cartItems.forEach((item) => {
-      http.delete(`/carts/${cartId}/items/${item.id}`);
-    });
-    setCartItems([]);
-  };
-
-  const deleteItem = (id) => {
-    http.delete(`/carts/${cartId}/items/${id}`).then(() => {
-      getCartItems();
-    });
-  };
-  
-  // Timer Countdown
-  const timeout = (number) => {
-      return new Promise( res => setTimeout(res, number));
-  };
-
-  const [duration, setDuration] = useState(5);
-  const timer = async () => {
-      for (var i=5; i >= 0; i--) {
-          setDuration(i)
-          await timeout(1000)
-      }
-      navigate("/products");
-  }
-
-  // Modal Resources
-  const [open, setOpen] = useState(false);
-  const handleClose = () => setOpen(false);
-  const handleOpen = () => setOpen(true);
-  const style = {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: 400,
-      borderRadius:5,
-      bgcolor: 'background.paper',
-      p: 4,
-    };
-      
 
   useEffect(() => {
     getCartId();
@@ -110,6 +46,47 @@ function Cart() {
     setTotal(newTotal);
   }, [cartItems]);
 
+  const getProductList = () => {
+    http.get('/products').then((res) => {
+      setProductList(res.data);
+    });
+  };
+
+  const getCartId = () => {
+    http.get(`/carts?search=${custId}`).then((res) => {
+      setCartId(res.data[0]?.id || '');
+    });
+  };
+
+  const getCartItems = () => {
+    if (cartId) {
+      http.get(`/carts/${cartId}/items`).then((res) => {
+        setCartItems(res.data);
+      });
+    }
+  };
+
+  const onClickCheckout = () => {
+    setCheckoutLoading(true);
+    setTimeout(() => {
+      navigate('/checkout');
+    }, 3000);
+  };
+
+  const confirmDelete = (id) => {
+    setItemToDelete(id);
+    setOpenConfirm(true);
+  };
+
+  const deleteItem = () => {
+    if (itemToDelete) {
+      http.delete(`/carts/${cartId}/items/${itemToDelete}`).then(() => {
+        getCartItems();
+        setOpenConfirm(false);
+      });
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
@@ -120,7 +97,7 @@ function Cart() {
           const product = prodList.find((prod) => prod.id === citem.ProductId);
           return (
             <Grid item xs={12} sm={6} md={4} key={citem.id}>
-              <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <Card>
                 {product?.imgId && (
                   <CardMedia
                     component="img"
@@ -129,23 +106,13 @@ function Cart() {
                     alt={product.prod_name}
                   />
                 )}
-                <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    {product?.prod_name || 'Product Name'}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Qty: {citem.quantity}
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                    Total: ${citem.total}
-                  </Typography>
+                <CardContent>
+                  <Typography variant="h6">{product?.prod_name || 'Product Name'}</Typography>
+                  <Typography>Qty: {citem.quantity}</Typography>
+                  <Typography>Total: ${citem.total}</Typography>
                 </CardContent>
-                <Box sx={{ p: 2, textAlign: 'center' }}>
-                  <IconButton
-                    color="error"
-                    onClick={() => deleteItem(citem.id)}
-                    title="Remove Item"
-                  >
+                <Box sx={{ textAlign: 'center' }}>
+                  <IconButton color="error" onClick={() => confirmDelete(citem.id)}>
                     <Delete />
                   </IconButton>
                 </Box>
@@ -156,39 +123,30 @@ function Cart() {
       </Grid>
       <Box sx={{ mt: 4, textAlign: 'right' }}>
         <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-          Total: ${total}
+          Total: ${total.toFixed(2)}
         </Typography>
         <Button
           variant="contained"
           color="primary"
-          sx={{ mr: 2 }}
+          startIcon={checkoutLoading ? <CircularProgress size={24} /> : <ShoppingCartCheckout />}
           onClick={onClickCheckout}
+          disabled={checkoutLoading}
         >
-          Checkout
-        </Button>
-        <Button
-          variant="outlined"
-          color="error"
-          onClick={onClickClearCart}
-        >
-          Clear Cart
+          {checkoutLoading ? 'Processing...' : 'Checkout'}
         </Button>
       </Box>
-      <Modal
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-      >
-          <Box sx={style}>
-              <Typography id="modal-modal-title" variant="h5" component="h2">
-              Adding your new product!
-              </Typography>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                  You will be redirected to the product page in... {duration}s
-              </Typography>
-          </Box>
-      </Modal>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to remove this item?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={deleteItem} color="error">Yes</Button>
+          <Button onClick={() => setOpenConfirm(false)}>No</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

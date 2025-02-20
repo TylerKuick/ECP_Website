@@ -15,6 +15,8 @@ import AdminLogin from "./pages/AdminLogin";
 import OrderHistory from "./pages/OrderHistory";
 import Notifications from './pages/Notifications';
 import CartButton from './components/CartButton';
+import Checkout from './pages/Checkout';
+import ConfirmOrder from "./pages/ConfirmOrder";
 import http from './http.js';
 
 function App() {
@@ -58,13 +60,13 @@ function App() {
 
   return (
     <Router>
-      <AppBar position="static" className="AppBar">
+      <AppBar position="static" className="AppBar" sx={{ background: "#2C3E50", boxShadow: "0px 4px 10px rgba(0,0,0,0.2)" }}>
         <Container>
           <Toolbar disableGutters sx={{ justifyContent: "space-between" }}>
-            <Link to="/">
-              <Typography variant="h6" component="div">ShopEasy</Typography>
+            <Link to="/" style={{ textDecoration: "none", color: "white" }}>
+              <Typography variant="h5" fontWeight="bold" component="div">ShopEasy</Typography>
             </Link>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
               <Link to="/"><Typography>Home</Typography></Link>
               <Link to="/products"><Typography>Products</Typography></Link>
               {/* <Link to="/orderHistory"><Typography>Orders</Typography></Link> */}
@@ -105,6 +107,8 @@ function App() {
           <Route path="notifications" element={<Notifications/>}/>
           <Route path="/user-login" element={<UserLogin setUser={setUser} />} />
           <Route path="/admin-login" element={<AdminLogin setUser={setUser} />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/confirm-order" element={<ConfirmOrder />} />
           <Route
             path="/admin"
             element={user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/" />}

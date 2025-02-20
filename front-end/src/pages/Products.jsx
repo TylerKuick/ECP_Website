@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Grid2, Card, CardContent, IconButton, TextField, Button, CardMedia } from '@mui/material';
+import { Box, Typography, Grid2, Card, CardContent, IconButton, TextField, Button, CardMedia, Snackbar, Alert } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Search, Clear, Delete, Edit } from '@mui/icons-material';
 import http from '../http';
@@ -29,6 +29,7 @@ function Products({ user }) {
             "total": (product.prod_price * qty),
         };
         http.post(`/carts/${cartId}/items`, data);
+        setOpenSnackbar(true);
     };
 
     const getProducts = () => {
@@ -80,6 +81,12 @@ function Products({ user }) {
     const onClickClear = () => {
         setSearch('');
         getProducts();
+    };
+
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+
+    const handleCloseSnackbar = () => {
+        setOpenSnackbar(false);
     };
 
     // Initialization
@@ -218,9 +225,20 @@ function Products({ user }) {
                                 </Box>
                             </CardContent>
                         </Card>
-                    </Grid2>
+                    </Grid2>    
                 ))}
             </Grid2>
+
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={3000}
+                onClose={handleCloseSnackbar}
+            >
+                <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+                    Item added to cart!
+                </Alert>
+            </Snackbar>
+
             <div>
                 <LexChatbot />
             </div>
