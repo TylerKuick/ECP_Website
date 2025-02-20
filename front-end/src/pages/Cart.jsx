@@ -8,6 +8,7 @@ import {
   IconButton,
   Button,
   CardMedia,
+  Modal
 } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import http from '../http';
@@ -47,7 +48,7 @@ function Cart() {
       cart_total: total,
     };
     console.log(data);
-    // http.post(`/cart/${cartId}/checkout`, data);
+    // http.post(`/cart/${cartId}/`, data);
   };
 
   const onClickClearCart = () => {
@@ -62,6 +63,36 @@ function Cart() {
       getCartItems();
     });
   };
+  
+  // Timer Countdown
+  const timeout = (number) => {
+      return new Promise( res => setTimeout(res, number));
+  };
+
+  const [duration, setDuration] = useState(5);
+  const timer = async () => {
+      for (var i=5; i >= 0; i--) {
+          setDuration(i)
+          await timeout(1000)
+      }
+      navigate("/products");
+  }
+
+  // Modal Resources
+  const [open, setOpen] = useState(false);
+  const handleClose = () => setOpen(false);
+  const handleOpen = () => setOpen(true);
+  const style = {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: 400,
+      borderRadius:5,
+      bgcolor: 'background.paper',
+      p: 4,
+    };
+      
 
   useEffect(() => {
     getCartId();
@@ -143,6 +174,21 @@ function Cart() {
           Clear Cart
         </Button>
       </Box>
+      <Modal
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+      >
+          <Box sx={style}>
+              <Typography id="modal-modal-title" variant="h5" component="h2">
+              Adding your new product!
+              </Typography>
+              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  You will be redirected to the product page in... {duration}s
+              </Typography>
+          </Box>
+      </Modal>
     </Box>
   );
 }

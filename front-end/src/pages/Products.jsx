@@ -106,7 +106,15 @@ function Products({ user }) {
                     </Link>
                     </Button>) : <></> 
                 }
-                
+                {
+                    isUser ? (
+                        <Button variant="contained" color="primary">
+                    <Link to="/notifications" className="link">
+                        Notifications
+                    </Link>
+                    </Button>) : <></> 
+                    
+                }
             </Box>
 
             {/* Search Bar */}

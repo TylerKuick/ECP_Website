@@ -9,7 +9,7 @@ def lambda_handler(event, context):
     password = "password" 
     database_name = "ecp_dev" 
     result = ""
-
+    
     sns = boto3.client('sns')
     SNS_TOPIC_ARN = os.environ['SNS_TOPIC_ARN']
     try: 
@@ -19,6 +19,22 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": f"Database connection failed: {str(e)}"})
         }
+        
+    try:
+        # Send SNS Notification for new product being added
+        message = f"""
+        New product has been added! 
+        
+        Product Name: {event['prod_name']}
+        Price: {event['prod_price']}
+        """
+        sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message, Subject="New Product Alert!")
+    except Exception as e: 
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": f"SNS failed: {str(e)}"})
+        }
+        
     try:     
         connection.ping(reconnect=False)
         cursor = connection.cursor(pymysql.cursors.DictCursor)
@@ -30,14 +46,6 @@ def lambda_handler(event, context):
         cursor.close()
         connection.close()
 
-        # Send SNS Notification for new product being added
-        message = f"""
-        New product has been added! 
-        Product Name: {event['prod_name']}
-        Price: {event['prod_price']}
-        """
-        sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message)
-        
         return {
             'statusCode': 201,
             'body': json.dumps(f"{result}")

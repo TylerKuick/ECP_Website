@@ -67,7 +67,7 @@ function NewProduct() {
     }
     
     // Modal Resources
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
     const handleClose = () => setOpen(false);
     const handleOpen = () => setOpen(true);
     const style = {

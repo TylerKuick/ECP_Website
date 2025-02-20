@@ -12,6 +12,8 @@ import ChatbotPage from "./pages/ChatbotPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserLogin from "./pages/UserLogin";
 import AdminLogin from "./pages/AdminLogin";
+import OrderHistory from "./pages/OrderHistory";
+import Notifications from './pages/Notifications';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -49,7 +51,7 @@ function App() {
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Link to="/"><Typography>Home</Typography></Link>
               <Link to="/products"><Typography>Products</Typography></Link>
-              <Link to="/chatbot"><Typography>Chatbot</Typography></Link>
+              <Link to="/orderHistory"><Typography>Orders</Typography></Link>
               <Link to="/cart">
                 <ShoppingCart sx={{ width: "35px", height: "35px" }} />
               </Link>
@@ -82,6 +84,8 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/newProduct" element={<NewProduct />} />
           <Route path="updateProduct" element={<UpdateProduct/>}/>
+          <Route path="/orderHistory" element={<OrderHistory/>} />
+          <Route path="notifications" element={<Notifications/>}/>
           <Route path="/user-login" element={<UserLogin setUser={setUser} />} />
           <Route path="/admin-login" element={<AdminLogin setUser={setUser} />} />
           <Route
