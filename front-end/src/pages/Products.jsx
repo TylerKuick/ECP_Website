@@ -84,11 +84,12 @@ function Products({ user }) {
 
     // Initialization
     useEffect(() => {
-        getProducts();
+        
         getCartID();
     }, [cartId]);
     
     useEffect(() => {
+        getProducts();
         localStorage.setItem("UpdateItemData", JSON.stringify({}));
         console.log("localStorage at useEffect: ",localStorage.getItem("UpdateItemData"));
     }, [])

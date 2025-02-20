@@ -1,8 +1,12 @@
-import React from 'react'
+import {React} from 'react';
+
 
 function OrderHistory() {
+  
   return (
-    <div>OrderHistory</div>
+    <div>
+      
+    </div>
   )
 }
 

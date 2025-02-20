@@ -11,10 +11,11 @@ import { useNavigate } from 'react-router-dom';
 
 function NewProduct() {
     // // Image Upload to S3 from Form
-    const [img, setImg] = useState();
-    const [imgURL, setImgURL] = useState();
+    const [img, setImg] = useState(null);
+    const [imgURL, setImgURL] = useState(null);
     const [err, setError] = useState("");
-    const validTypes = ['image/jpg', 'image/png', 'image/jpeg']
+    const validTypes = ['image/jpg', 'image/png', 'image/jpeg'];
+
     const handleImgChange = (e) => {
         if (validTypes.find(type => type === e.target.files[0].type)) {
             setError();
@@ -80,19 +81,6 @@ function NewProduct() {
         bgcolor: 'background.paper',
         p: 4,
       };
-    
-    // Upload Image Button Input Style
-    const VisuallyHiddenInput = styled('input')({
-        clip: 'rect(0 0 0 0)',
-        clipPath: 'inset(50%)',
-        height: 1,
-        overflow: 'hidden',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        whiteSpace: 'nowrap',
-        width: 1,
-      });
 
     const navigate = useNavigate();
     const now = dayjs();
@@ -128,7 +116,7 @@ function NewProduct() {
             });
         }
     });
-
+    const [selectedImage, setSelectedImage] = useState(null);
     return (
         <Box sx={{ mt: 5, display: 'flex', justifyContent: 'center' }}>
             <Card sx={{ width: '100%', maxWidth: 600, boxShadow: 3, p: 2 }}>
@@ -136,39 +124,44 @@ function NewProduct() {
                     <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
                         Add New Product
                     </Typography>
-                    <Button
-                        component="label"
-                        variant="contained"
-                        tabIndex={-1}
-                        startIcon={<CloudUpload />}
-                        sx ={{ display:"flex", justifySelf: "center"}}
-                        >
-                        Upload Image
-                        <VisuallyHiddenInput
-                            type="file"
-                            onChange={handleImgChange}
-                            multiple
-                        />
-                    </Button>
-                    {
-                        img ? (
-                            <Container sx={{mt:3}}>
-                                <img 
-                                    style={{width:"100%"}}
-                                    src={imgURL}
-                                    loading="lazy"
-                                />
-                            </Container>
-                        ) : <></>
-                    }
-                    { 
-                        err ? (
-                            <Typography sx={{display:"flex", justifySelf:"center", color:"red", mt: 3}}>
-                                {err}
-                            </Typography>
-                        ) : <></>
-                    }
+                    
                     <Box component="form" onSubmit={formik.handleSubmit}>
+                        <Box sx={{display:"flex", justifyContent:"center"}}>
+                           
+                        </Box>
+                        
+                        <Button
+                            component="label"
+                            variant="contained"
+                            tabIndex={-1}
+                            startIcon={<CloudUpload />}
+                            sx ={{ display:"flex", justifySelf: "center"}}
+                            >
+                            Upload Image
+                            <input
+                                style={{display:"none"}}
+                                type="file"
+                                onChange={handleImgChange}
+                            /> 
+                        </Button>
+                        {
+                            img ? (
+                                <Container sx={{mt:3}}>
+                                    <img 
+                                        style={{width:"100%"}}
+                                        src={imgURL}
+                                        loading="lazy"
+                                    />
+                                </Container>
+                            ) : <></>
+                        }
+                        { 
+                            err ? (
+                                <Typography sx={{display:"flex", justifySelf:"center", color:"red", mt: 3}}>
+                                    {err}
+                                </Typography>
+                            ) : <></>
+                        }
                         <TextField
                             fullWidth
                             margin="normal"
