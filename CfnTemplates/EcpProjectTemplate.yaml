@@ -443,7 +443,7 @@ Resources:
             sudo -s 
             cd ./ECP_Website
             sudo cp httpd.conf /etc/httpd/conf -r 
-            
+            sudo cp .htaccess /var/www/html
             cd ./ECP_Website/front-end
             
             #Set Backend API URL to API Gateway
@@ -460,7 +460,6 @@ Resources:
             npm i
             #npm run build
             sudo cp -r dist/* /var/www/html
-            sudo cp dist/.htaccess /var/www/html
             sudo systemctl restart httpd
     
   WebTargetGroup:

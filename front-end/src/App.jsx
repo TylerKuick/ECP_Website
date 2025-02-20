@@ -23,13 +23,14 @@ function App() {
   });
 
   const [cartLength, setCartLength] = useState(0);
+  const [cartItems, setCartItems] = useState([])
   const getCartLength = () => {
     const cartId = 4
     http.get(`/carts?search=1`).then((res) => {
       if (cartId) {
         http.get(`/carts/${cartId}/items`).then((res) => {
           setCartLength(res.data.length);
-          console.log(res.data.length);
+          setCartItems(res.data);
         });
       }
     })
@@ -40,7 +41,7 @@ function App() {
   useEffect(() => {
     localStorage.setItem("user", JSON.stringify(user));
     getCartLength();
-  }, [user]);
+  }, [user, cartItems]);
 
   const handleLogout = () => {
     setUser(null);
