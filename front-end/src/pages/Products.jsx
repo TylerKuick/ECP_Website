@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Search, Clear, Delete, Edit } from '@mui/icons-material';
 import http from '../http';
 import LexChatbot from '../components/Chatbot';
+import CartButton from '../components/CartButton';
 
 function Products({ user }) {
     const [productList, setProductList] = useState([]);
@@ -185,8 +186,8 @@ function Products({ user }) {
                                         >
                                             Add to Cart
                                         </Button>
+                                        
                                     )}
-
                                     {/* Show delete button only if user is an admin */}
                                     {isAdmin && (
                                         <Box>

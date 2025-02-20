@@ -14,16 +14,32 @@ import UserLogin from "./pages/UserLogin";
 import AdminLogin from "./pages/AdminLogin";
 import OrderHistory from "./pages/OrderHistory";
 import Notifications from './pages/Notifications';
+import CartButton from './components/CartButton';
+import http from './http.js';
 
 function App() {
   const [user, setUser] = useState(() => {
     return JSON.parse(localStorage.getItem("user")) || null;
   });
 
+  const [cartLength, setCartLength] = useState(0);
+  const getCartLength = () => {
+    const cartId = 4
+    http.get(`/carts?search=1`).then((res) => {
+      if (cartId) {
+        http.get(`/carts/${cartId}/items`).then((res) => {
+          setCartLength(res.data.length);
+          console.log(res.data.length);
+        });
+      }
+    })
+  }
+
   const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("user", JSON.stringify(user));
+    getCartLength();
   }, [user]);
 
   const handleLogout = () => {
@@ -38,7 +54,6 @@ function App() {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-  console.log(user);
 
   return (
     <Router>
@@ -51,9 +66,10 @@ function App() {
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Link to="/"><Typography>Home</Typography></Link>
               <Link to="/products"><Typography>Products</Typography></Link>
-              <Link to="/orderHistory"><Typography>Orders</Typography></Link>
+              {/* <Link to="/orderHistory"><Typography>Orders</Typography></Link> */}
               <Link to="/cart">
-                <ShoppingCart sx={{ width: "35px", height: "35px" }} />
+                {/* <ShoppingCart sx={{ width: "35px", height: "35px" }} /> */}
+                <CartButton cartLength={cartLength}/>
               </Link>
 
               {user ? (
