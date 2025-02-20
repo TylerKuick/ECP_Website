@@ -55,12 +55,15 @@ function Checkout() {
           return (
           <Grid item xs={12} key={product.id}>
             <Card>
-              <CardContent>
-                <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold", color: "black" }}>
-                  {/* Ensure prod_name exists or fallback to 'Product Name' */}
-                  {product.prod_name || 'Product Name'}
-                </Typography>
-                <Typography variant="body1">Price: ${item.total}</Typography>
+              <CardContent sx={{display:"flex", justifyContent:"space-between"}}>
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold", color: "black" }}>
+                    {/* Ensure prod_name exists or fallback to 'Product Name' */}
+                    {product.prod_name || 'Product Name'}
+                  </Typography>
+                  <Typography variant="body1">Price: ${item.total}</Typography>
+                </Box>
+                <Typography variant='body1' sx={{mt:3, mr: 3}}>Qty: {item.quantity}</Typography>
               </CardContent>
             </Card>
           </Grid>
