@@ -9,7 +9,17 @@ function Checkout() {
   const navigate = useNavigate();
   const custId = 1;
 
+  const [prodList, setProductList] = useState([]);
+  const getProducts = () => {
+    http.get('/products').then((res) => {
+      setProductList(res.data);
+    });
+  }
+
   useEffect(() => {
+    // Fetch Product List
+    getProducts();
+
     // Fetch cart items
     http.get(`/carts?search=${custId}`).then((res) => {
       const cartId = res.data[0]?.id || '';
@@ -40,19 +50,21 @@ function Checkout() {
         Order Summary
       </Typography>
       <Grid container spacing={3}>
-        {cartItems.map((item) => (
-          <Grid item xs={12} key={item.id}>
+        {cartItems.map((item) => {
+          const product = prodList.find((prod) => prod.id == item.ProductId);
+          return (
+          <Grid item xs={12} key={product.id}>
             <Card>
               <CardContent>
                 <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold", color: "black" }}>
                   {/* Ensure prod_name exists or fallback to 'Product Name' */}
-                  {item.prod_name || 'Product Name'}
+                  {product.prod_name || 'Product Name'}
                 </Typography>
                 <Typography variant="body1">Price: ${item.total}</Typography>
               </CardContent>
             </Card>
           </Grid>
-        ))}
+        )})}
       </Grid>
 
       <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 3 }}>

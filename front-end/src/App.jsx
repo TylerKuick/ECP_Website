@@ -57,7 +57,7 @@ function App() {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
+  
   return (
     <Router>
       <AppBar position="static" className="AppBar" sx={{ background: "#2C3E50", boxShadow: "0px 4px 10px rgba(0,0,0,0.2)" }}>

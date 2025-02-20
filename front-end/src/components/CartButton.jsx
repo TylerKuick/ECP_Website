@@ -3,7 +3,6 @@ import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import Badge, { badgeClasses } from '@mui/material/Badge';
 import ShoppingCart from '@mui/icons-material/ShoppingCartOutlined';
-import http from '../http';
 
 function CartButton({cartLength}) {
     const CartBadge = styled(Badge)`
